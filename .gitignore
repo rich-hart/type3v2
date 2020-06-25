@@ -30,3 +30,4 @@ capco/private.py
 .env
 data
 
+type3/settings/private.py 
