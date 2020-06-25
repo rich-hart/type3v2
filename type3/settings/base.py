@@ -1,3 +1,3 @@
 from .core import *
 
-INSTALLED_APPS += ['base']
+INSTALLED_APPS += depends.build('base')
