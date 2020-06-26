@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='job',
             name='status',
-            field=models.CharField(choices=[('UN', 'UNKNOWN')], default=jobs.models.Job.StatusType['UNKNOWN'], max_length=2),
+            field=models.CharField(choices=[('UN', 'UNKNOWN')], default=jobs.models.Job.Status['UNKNOWN'], max_length=2),
         ),
     ]

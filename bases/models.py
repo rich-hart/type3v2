@@ -5,7 +5,6 @@ from tagging.registry import register
 
 from enum import Enum
 
-DEFAULT_CHOICE_CHAR_LENTH = 2
 
 class ChoiceType(Enum):
      @classmethod

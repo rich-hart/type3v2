@@ -10,4 +10,4 @@ class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(owner=self.request.user,status=Job.Status.CREATED.value)

@@ -34,7 +34,6 @@ class TestDemo(TestBinaryClassificationJob):
     def test_post_job(self):
         owner = User.objects.create(username='test')
         job_url = reverse('job-list')
-
         data = {
             'owner': owner.id,
         }

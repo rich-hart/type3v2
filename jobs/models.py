@@ -17,13 +17,15 @@ class Job(Base):
         User,
         on_delete=models.CASCADE,
     )
-    class StatusType(ChoiceType):
+    class Status(ChoiceType):
         UNKNOWN = 'UN' 
+        COMPLETE = 'CP'
+        CREATED = 'CR'
 
     status = models.CharField(
         max_length=2,
-        choices=StatusType.get_choices(),
-        default=StatusType.UNKNOWN.value,
+        choices=Status.get_choices(),
+        default=Status.UNKNOWN.value,
     )
 
     def run(self):
