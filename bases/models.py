@@ -1,6 +1,6 @@
 import uuid
 from django.db import models
-from tagging.models import Tag
+from tagging.models import Tag, TaggedItem
 from tagging.registry import register
 from django.apps import apps
 
@@ -119,6 +119,36 @@ class Base(models.Model):
         label = Label.objects.create(name=name,description=description)
         self.add_label(label)
         return label.id
+
+    @property
+    def object_set(self):
+        if self._object_set:
+            return self._object_set
+        # TODO: use hashing to look up object type. 
+        tags = Tag.objects.filter(name=self.tag.hex)
+        objects = []
+        for tag in tags:
+            object_tag = tag
+            #FIXME: TODO Move hash memory retieval into Base class
+            object_label_hex = uuid.uuid3(self.OBJECT_NAMESPACE, object_tag.name)
+            memory_block = Label.objects.get(id=object_label_hex) 
+            model_name = Label.decode(memory_block.data)
+
+
+            app_label_hex = uuid.uuid3(self.APP_NAMESPACE, object_tag.name)
+            memory_block = Label.objects.get(id=app_label_hex)
+            app_label =  Label.decode(memory_block.data)
+
+            Model = apps.get_model(app_label=app_label, model_name=model_name)
+
+            instances = TaggedItem.objects.get_by_model(Model, object_tag)
+            for instance in instances:
+                objects.append(instance)
+
+        self._object_set = objects
+
+        return self._object_set
+
 
     class Meta:
         abstract = True

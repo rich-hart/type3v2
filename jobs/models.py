@@ -65,34 +65,6 @@ class Classification(Job):
 
     _object_set = None
 
-    @property
-    def object_set(self):
-        if self._object_set:
-            return self._object_set
-        # TODO: use hashing to look up object type. 
-        tags = Tag.objects.filter(name=self.tag.hex)
-        objects = []
-        for tag in tags:
-            object_tag = tag
-            #FIXME: TODO Move hash memory retieval into Base class
-            object_label_hex = uuid.uuid3(self.OBJECT_NAMESPACE, object_tag.name)
-            memory_block = Label.objects.get(id=object_label_hex) 
-            model_name = Label.decode(memory_block.data)
-
-
-            app_label_hex = uuid.uuid3(self.APP_NAMESPACE, object_tag.name)
-            memory_block = Label.objects.get(id=app_label_hex)
-            app_label =  Label.decode(memory_block.data)
-
-            Model = apps.get_model(app_label=app_label, model_name=model_name)
-
-            instances = TaggedItem.objects.get_by_model(Model, object_tag)
-            for instance in instances:
-                objects.append(instance)
-
-        self._object_set = objects
-
-        return self._object_set
 
     @property
     def metric(self):
