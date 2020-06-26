@@ -1,3 +1,7 @@
 from django.db import models
 
-# Create your models here.
+from bases.models import Base
+
+class Action(Base):
+    pass
+

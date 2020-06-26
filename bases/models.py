@@ -4,6 +4,7 @@ from django.db import models
 from tagging.registry import register
 
 #NOTE: THIS CLASS DOUBLES AS A HASHTAG DATA STORE
+#FIXME: TODO Refactor Label --> Map
 class Label(models.Model):
     id = models.UUIDField(
         primary_key = True, 
@@ -28,7 +29,8 @@ class Base(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     tag = models.UUIDField(
-        primary_key = False, 
+        primary_key = False,
+        unique = True,  
         default = uuid.uuid4, 
         editable = False,
     )
@@ -42,6 +44,8 @@ class Base(models.Model):
         self.tags.append(label.id)
 
 
+    def tag_object(self, object):
+        object.tags.append(self.tag)
 #?????
 #    def add_tag(self, instance):
 #        self.tags.append(instance.tag) OR instance.tags.append(self.tag)

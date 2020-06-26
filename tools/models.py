@@ -7,7 +7,8 @@ class Tool(models.Model):
    
     pass
 
-
-
+#
+#class Vector(MONGODB):
+#    pass
     # CLASSIFIERING? 
     # MACHINE LEARNING?

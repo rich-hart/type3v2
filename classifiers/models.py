@@ -14,7 +14,11 @@ from tools.models import Tool
 #class NN(Vector):
 #    pass
 
-
+#FIXME: TODO 
+#class Label(Map):
+#  @property
+#  def name(self):
+#  return __str__
 
 class Classifier(Tool):
     LABEL_NAMESPACE = 'CLASSIFIER_LABELS'
@@ -50,7 +54,7 @@ class Classifier(Tool):
 
         
 class Random(Classifier):
-    #TODO: seed 
+    #TODO: random seed 
     def classify(self, *args): 
         label = random.choice(self.labels)
         return label
@@ -60,3 +64,13 @@ class Human(Classifier):
         User,
         on_delete=models.CASCADE,
     )
+
+    @property
+    def seed(self):
+        return self.user.id
+
+class ML(Classifier):
+    #TODO: random seed 
+    def train(self, *args, **kwargs):
+        raise NotImplementedError
+
