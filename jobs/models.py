@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from tagging.models import Tag
-from bases.models import Base, ChoiceType
+from bases.models import Base, Choice, Label 
 
 from buckets.models import Bucket
 from classifiers.models import Classifier, Human as HumanClassifier
@@ -17,7 +17,7 @@ class Job(Base):
         Profile,
         on_delete=models.CASCADE,
     )
-    class Status(ChoiceType):
+    class Status(Choice):
         UNKNOWN = 'UN' 
         CREATED = 'CR'
         PENDING = 'PN' #Might not use
@@ -26,6 +26,7 @@ class Job(Base):
 
     status = models.CharField(
         max_length=2,
+        #choices=Status, #TODO fix this, make PR to django official cite
         choices=Status.get_choices(),
         default=Status.UNKNOWN.value,
     )
@@ -58,12 +59,14 @@ class ProgressReport(Base):
 
 class Classification(Job):
     description = "classify the instances in an object set"
-    #TODO: classifier = #foriegn key Classifier
+    #TODO: classifier = #foriegn key Classifier, try to use Model string name for import.
+
 
     @property
     def object_set(self):
         import ipdb; ipdb.set_trace()
-        tags = Tag.objects.filter(name=self.tag)
+        # TODO: use hashing to look up object type. 
+        tags = Tag.objects.filter(name=self.tag.hex)
         return objects
 
     @property

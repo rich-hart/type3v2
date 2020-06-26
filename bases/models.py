@@ -1,18 +1,22 @@
 import uuid
 from django.db import models
-
+from tagging.models import Tag
 from tagging.registry import register
 
 from enum import Enum
+import base64
+#binascii.b2a_hex
+#base64.b64encode
 
-
-class ChoiceType(Enum):
+class Choice(Enum):
      @classmethod
      def get_choices(cls):
          return [ (name,value) for (name,value) in enumerate(cls) ]
 
 #NOTE: THIS CLASS DOUBLES AS A HASHTAG DATA STORE
-#FIXME: TODO Refactor Label --> Map
+#FIXME: TODO Refactor Label --> Map / MemoryCell for extra tagging data 
+# TODO: Choose Encoding
+# TODO: need clean up function for Label / Map / MemoryCell / hash namepaces 
 class Label(models.Model):
     id = models.UUIDField(
         primary_key = True, 
@@ -26,14 +30,24 @@ class Label(models.Model):
     # def __str__ --> self.data
     # def name --> def __str__           
 
+    @staticmethod
+    def encode_string(string):
+        encoding = base64.b64encode(string.encode('utf-8'))
+        return encoding
  
     @property
     def name(self):
         return str(self.data)
 
-register(Label)
+#register(Label)
+#TODO: move to utils
+def get_namespace(name):
+    namespace = uuid.uuid3(uuid.NAMESPACE_DNS, name)
+    return namespace
 
 class Base(models.Model):
+    OBJECT_NAMESPACE = get_namespace('OBJECT_NAME')
+
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     tag = models.UUIDField(
@@ -51,9 +65,16 @@ class Base(models.Model):
     def add_label(self, label):
         self.tags.append(label.id)
 
+    @property
+    def classname(self):
+        return self.__class__.__name__
 
     def tag_object(self, object):
-        object.tags.append(self.tag)
+        object_label_hex = uuid.uuid3(self.OBJECT_NAMESPACE, self.tag.hex)
+        object_label = object.classname
+        Tag.objects.add_tag(object, self.tag.hex)
+        data = Label.encode_string(object_label)
+        Label.objects.update_or_create(id=object_label_hex, data=data)
 #?????
 #    def add_tag(self, instance):
 #        self.tags.append(instance.tag) OR instance.tags.append(self.tag)

@@ -36,11 +36,14 @@ class TestDemo(TestBinaryClassificationJob):
 
         test_objects = [User.objects.create(username=str(i)) for i in range(5)]
 
+        for user in test_objects:
+            Profile.objects.create(user=user)
+
         for test_object in test_objects:
-            job.tag_object(test_object)
+            job.tag_object(test_object.profile)
             test_object.save()
         
-        job = Classification.objects.get(job.id)
+        job = Classification.objects.get(id=job.id)
         expected = test_objects
         returned = job.object_set
         self.assertListEqual(expected, returned)
