@@ -22,9 +22,28 @@ class TestBinaryClassificationJob(TestCase):
 
 class TestDemo(TestBinaryClassificationJob):
 
+    def setUp(self):
+        self.test_user = User.objects.create(username='test')
+        Profile.objects.create(user=self.test_user)
+
     def test_create_job(self):
-        owner = User.objects.create(username='test')
-        Classification.objects.create(owner=owner)
+        owner  = self.test_user
+        Classification.objects.create(owner=owner.profile)
+
+    def test_object_set(self):
+        owner = self.test_user 
+        job = Classification.objects.create(owner=owner.profile)
+
+        test_objects = [User.objects.create(username=str(i)) for i in range(5)]
+
+        for test_object in test_objects:
+            job.tag_object(test_object)
+            test_object.save()
+        
+        job = Classification.objects.get(job.id)
+        expected = test_objects
+        returned = job.object_set
+        self.assertListEqual(expected, returned)
 
     def test_get_jobs(self):
         job_url = reverse('job-list')
@@ -32,12 +51,11 @@ class TestDemo(TestBinaryClassificationJob):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_post_job(self):
-        owner = User.objects.create(username='test')
         job_url = reverse('job-list')
         data = {
-            'owner': owner.id,
+            'owner': self.test_user.profile,
         }
-        self.client.force_login(owner)
+        self.client.force_login(self.test_user)
         response = self.client.post(job_url, data,format='json') #follow=True
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 #    @classmethod

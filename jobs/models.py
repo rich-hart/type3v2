@@ -6,7 +6,7 @@ from bases.models import Base, ChoiceType
 
 from buckets.models import Bucket
 from classifiers.models import Classifier, Human as HumanClassifier
-
+from users.models import Profile
 #class Problem(models.Model):
 #    pass
 # documents in a bucket need to be classified as libor / non-libor
@@ -14,7 +14,7 @@ from classifiers.models import Classifier, Human as HumanClassifier
 class Job(Base):
     description = None
     owner = models.OneToOneField(
-        User,
+        Profile,
         on_delete=models.CASCADE,
     )
     class Status(ChoiceType):
@@ -62,7 +62,8 @@ class Classification(Job):
 
     @property
     def object_set(self):
-        objects = Tag.objects.filter(name=self.tag).value('object')
+        import ipdb; ipdb.set_trace()
+        tags = Tag.objects.filter(name=self.tag)
         return objects
 
     @property
