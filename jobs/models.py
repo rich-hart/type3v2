@@ -1,12 +1,16 @@
 from django.db import models
 
-from bases import Base
+from bases.models import Base
+
+from buckets.models import Bucket
+
 #class Problem(models.Model):
 #    pass
 # documents in a bucket need to be classified as libor / non-libor
 
 class Job(Base):
     description = None
+    status = None
     #TODO: owner
 
     def run(self):
@@ -24,13 +28,14 @@ class ProgressReport(Base):
     #foriegn key to job
     #NOTE: restrict update in view
     # _metric = [0,1]
-    metric = models.DecimalField(max_digits=1, decimal_places=5)
-    error = models.DecimalField(max_digits=1, decimal_places=5)
+    metric = models.FloatField()
+    error = models.FloatField()
 
     def save(self, *args, **kwargs):
         self.metric = self.job.metric
         self.error = self.job.error
-        super(Progress, self).__init__(*args, **kwargs)
+        super(Progress, self).save(*args, **kwargs)
+
 
 
 class DocumentBinaryClassification(Job):

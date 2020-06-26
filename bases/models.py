@@ -3,17 +3,26 @@ from django.db import models
 
 from tagging.registry import register
 
-
+#NOTE: THIS CLASS DOUBLES AS A HASHTAG DATA STORE
 class Label(models.Model):
     id = models.UUIDField(
         primary_key = True, 
         default = uuid.uuid4, 
         editable = False,
     )
-    name = models.CharField(max_length=127)
-    index = models.IntegerField(null=True)
-    description = models.TextField(blank=True)
+    #FIXME: TODO # MAKE _data HEX BINARY for better querying
+    data = models.CharField(max_length=32)
 
+    #FIXME: TODO 
+    # def __str__ --> self.data
+    # def name --> def __str__           
+
+ 
+    @property
+    def name(self):
+        return str(self.data)
+
+register(Label)
 
 class Base(models.Model):
     created = models.DateTimeField(auto_now_add=True)
