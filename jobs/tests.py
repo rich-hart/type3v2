@@ -22,7 +22,8 @@ class TestBinaryClassificationJob(TestCase):
 
 class TestDemo(TestBinaryClassificationJob):
     def test_create_job(self):
-        Classification.objects.create()
+        owner = User.objects.create(username='test')
+        Classification.objects.create(owner=owner)
 
     def test_post_job(self):
         owner = User.objects.create(username='test')
