@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from tagging.models import Tag
 from tagging.registry import register
+from django.apps import apps
 
 from enum import Enum
 import base64
@@ -29,11 +30,28 @@ class Label(models.Model):
     #FIXME: TODO 
     # def __str__ --> self.data
     # def name --> def __str__           
+    #FIXME: TODO encode_string --> encode
+
+
+#    @staticmethod
+#    def encode_string(string):
+#        encoding = base64.b64encode(string.encode('utf-8'))
+#        return encoding
+
+
 
     @staticmethod
     def encode_string(string):
-        encoding = base64.b64encode(string.encode('utf-8'))
-        return encoding
+        string = string.encode('utf-8')
+        string = base64.b64encode(string)
+        string = string.decode('utf-8')
+        return string
+
+    @staticmethod
+    def decode(data):
+        decoding = base64.b64decode(data).decode('utf-8')
+        return decoding
+
  
     @property
     def name(self):
@@ -47,6 +65,7 @@ def get_namespace(name):
 
 class Base(models.Model):
     OBJECT_NAMESPACE = get_namespace('OBJECT_NAME')
+    APP_NAMESPACE = get_namespace('APP_NAME')
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -65,16 +84,31 @@ class Base(models.Model):
     def add_label(self, label):
         self.tags.append(label.id)
 
+    @property 
+    def module_path(self):
+        return self.__module__
+
+    @property 
+    def app_name(self):
+        return self.__module__.split('.')[0]
+
     @property
-    def classname(self):
+    def class_name(self):
         return self.__class__.__name__
 
     def tag_object(self, object):
-        object_label_hex = uuid.uuid3(self.OBJECT_NAMESPACE, self.tag.hex)
-        object_label = object.classname
         Tag.objects.add_tag(object, self.tag.hex)
-        data = Label.encode_string(object_label)
+
+        object_label_hex = uuid.uuid3(self.OBJECT_NAMESPACE, self.tag.hex)
+        object_label = object.class_name
+        data = Label.encode_string(object_label) 
         Label.objects.update_or_create(id=object_label_hex, data=data)
+
+        app_label_hex = uuid.uuid3(self.APP_NAMESPACE, self.tag.hex)
+        app_label = object.app_name
+        data = Label.encode_string(app_label)
+        Label.objects.update_or_create(id=app_label_hex, data=data)
+
 #?????
 #    def add_tag(self, instance):
 #        self.tags.append(instance.tag) OR instance.tags.append(self.tag)

@@ -44,8 +44,8 @@ class TestDemo(TestBinaryClassificationJob):
             test_object.save()
         
         job = Classification.objects.get(id=job.id)
-        expected = test_objects
-        returned = job.object_set
+        expected = sorted(list([ u.profile.id for u in test_objects ]))
+        returned = sorted(list([ p.id for p in  job.object_set]))
         self.assertListEqual(expected, returned)
 
     def test_get_jobs(self):
