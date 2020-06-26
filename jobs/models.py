@@ -63,9 +63,12 @@ class Classification(Job):
     description = "classify the instances in an object set"
     #TODO: classifier = #foriegn key Classifier, try to use Model string name for import.
 
+    _object_set = None
 
     @property
     def object_set(self):
+        if self._object_set:
+            return self._object_set
         # TODO: use hashing to look up object type. 
         tags = Tag.objects.filter(name=self.tag.hex)
         objects = []
@@ -87,7 +90,9 @@ class Classification(Job):
             for instance in instances:
                 objects.append(instance)
 
-        return objects
+        self._object_set = objects
+
+        return self._object_set
 
     @property
     def metric(self):
