@@ -25,9 +25,12 @@ class TestDemo(TestBinaryClassificationJob):
         Classification.objects.create()
 
     def test_post_job(self):
+        owner = User.objects.create(username='test')
         job_url = reverse('job-list')
         data = {
+            'owner': owner.id,
         }
+        self.client.force_login(owner)
         response = self.client.post(job_url, data,format='json') #follow=True
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 #    @classmethod

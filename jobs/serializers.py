@@ -10,4 +10,6 @@ class JobSerializer(serializers.ModelSerializer):
             'id',
             'description',
             'status',
-        ) 
+            #'progress',
+        )
+
