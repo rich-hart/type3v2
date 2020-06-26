@@ -19,8 +19,10 @@ class Job(Base):
     )
     class Status(ChoiceType):
         UNKNOWN = 'UN' 
-        COMPLETE = 'CP'
         CREATED = 'CR'
+        PENDING = 'PN' #Might not use
+        STARTED = 'ST'
+        COMPLETE = 'CP'
 
     status = models.CharField(
         max_length=2,
