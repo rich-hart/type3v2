@@ -4,6 +4,18 @@ from django.contrib.auth.models import User
 from bases.models import Label
 from tools.models import Tool
 
+#MONGO DB
+#class Vector(MONGODB):
+#     pass
+
+#class TFIDF(Vector)
+#     pass
+
+#class NN(Vector):
+#    pass
+
+
+
 class Classifier(Tool):
     LABEL_NAMESPACE = 'CLASSIFIER_LABELS'
     LABEL_INDEXSPACE = 'LABEL_INDEXS'
@@ -38,6 +50,7 @@ class Classifier(Tool):
 
         
 class Random(Classifier):
+    #TODO: seed 
     def classify(self, *args): 
         label = random.choice(self.labels)
         return label
@@ -47,5 +60,3 @@ class Human(Classifier):
         User,
         on_delete=models.CASCADE,
     )
-
-

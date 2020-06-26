@@ -1,9 +1,8 @@
 import unittest
 from django.test import TestCase
 
-from .demo import *
 #NOTE TEST INSTANCE
-class TestDemo(TestCase):
+class TestDocumentBinaryClassification(TestCase):
     @unittest.skip("NotImplemented")
     def test_job_owner_human(self):
         self.fail("NotImplementedError")
@@ -16,6 +15,9 @@ class TestDemo(TestCase):
     def test_job_owner_smart_bot(self):
         self.fail("NotImplementedError")
 
+
+class TestDemo(TestDocumentBinaryClassification):
+    pass
 #NOTE: TEST ABSTRACTION
 class TestJob(TestCase):
     @unittest.skip("NotImplemented")
