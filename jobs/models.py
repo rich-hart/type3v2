@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 from tagging.models import Tag
 from bases.models import Base
@@ -11,6 +12,10 @@ from classifiers.models import Classifier, Human as HumanClassifier
 
 class Job(Base):
     description = None
+    owner = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+    )
 
     def run(self):
         raise NotImplementedError

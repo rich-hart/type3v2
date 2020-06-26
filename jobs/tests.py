@@ -1,5 +1,9 @@
 import unittest
 from django.test import TestCase
+from rest_framework.test import APITestCase
+from django.urls import reverse
+from rest_framework import status
+from django.contrib.auth.models import User
 from .models import *
 #NOTE TEST INSTANCE
 class TestBinaryClassificationJob(TestCase):
@@ -21,7 +25,11 @@ class TestDemo(TestBinaryClassificationJob):
         Classification.objects.create()
 
     def test_post_job(self):
-        pass
+        job_url = reverse('job-list')
+        data = {
+        }
+        response = self.client.post(job_url, data,format='json') #follow=True
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 #    @classmethod
 #    def setUpClass(cls):
 #        pass
