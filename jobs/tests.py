@@ -21,13 +21,20 @@ class TestBinaryClassificationJob(TestCase):
 
 
 class TestDemo(TestBinaryClassificationJob):
+
     def test_create_job(self):
         owner = User.objects.create(username='test')
         Classification.objects.create(owner=owner)
 
+    def test_get_jobs(self):
+        job_url = reverse('job-list')
+        response = self.client.get(job_url, format='json') #follow=True
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_post_job(self):
         owner = User.objects.create(username='test')
         job_url = reverse('job-list')
+
         data = {
             'owner': owner.id,
         }

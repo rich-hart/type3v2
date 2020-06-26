@@ -2,10 +2,11 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from tagging.models import Tag
-from bases.models import Base
+from bases.models import Base, ChoiceType
 
 from buckets.models import Bucket
 from classifiers.models import Classifier, Human as HumanClassifier
+
 #class Problem(models.Model):
 #    pass
 # documents in a bucket need to be classified as libor / non-libor
@@ -16,13 +17,18 @@ class Job(Base):
         User,
         on_delete=models.CASCADE,
     )
+    class StatusType(ChoiceType):
+        UNKNOWN = 'UN' 
+
+    status = models.CharField(
+        max_length=2,
+        choices=StatusType.get_choices(),
+        default=StatusType.UNKNOWN.value,
+    )
 
     def run(self):
         raise NotImplementedError
 
-    @property
-    def status(self):
-        raise NotImplementedError
 
     @property
     def metric(self):

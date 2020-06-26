@@ -3,6 +3,15 @@ from django.db import models
 
 from tagging.registry import register
 
+from enum import Enum
+
+DEFAULT_CHOICE_CHAR_LENTH = 2
+
+class ChoiceType(Enum):
+     @classmethod
+     def get_choices(cls):
+         return [ (name,value) for (name,value) in enumerate(cls) ]
+
 #NOTE: THIS CLASS DOUBLES AS A HASHTAG DATA STORE
 #FIXME: TODO Refactor Label --> Map
 class Label(models.Model):
