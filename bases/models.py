@@ -153,4 +153,9 @@ class Base(models.Model):
     class Meta:
         abstract = True
 
+class Algorithm(models.Model):
+    input = None
+    output = None
+    class Meta:
+        abstract = True
 
