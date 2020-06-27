@@ -15,6 +15,8 @@ class Computer(Agent):
     # profile
     pass
 
+
+# NOTES: agent should use tools and procedures
 class Action(Base):
     pass
 
