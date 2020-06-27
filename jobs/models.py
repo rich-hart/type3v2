@@ -61,9 +61,7 @@ class ProgressReport(Base):
 
 class Classification(Job):
     description = "classify the instances in an object set"
-    #TODO: classifier = #foriegn key Classifier, try to use Model string name for import.
-
-
+    #TODO: classifier = #foriegn key Classifier, try to use Model string name for import
 
     @property
     def metric(self):
