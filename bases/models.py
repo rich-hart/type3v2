@@ -19,6 +19,7 @@ class Choice(Enum):
 # TODO: Choose Encoding
 # TODO: need clean up function for Label / Map / MemoryCell / hash namepaces 
 class Label(models.Model):
+    #FIXME: Label Depecated Switch with memory
     id = models.UUIDField(
         primary_key = True, 
         default = uuid.uuid4, 
@@ -57,6 +58,9 @@ class Label(models.Model):
     def name(self):
         return str(self.data)
 
+class Memory(Label): #FIXME: Make memory base class
+    pass
+
 #register(Label)
 #TODO: move to utils
 def get_namespace(name):
@@ -75,6 +79,7 @@ class Base(models.Model):
         default = uuid.uuid4, 
         editable = False,
     )
+    # Move to objects
     _object_set = None
 
     #class Namespace(Enum):
@@ -162,6 +167,10 @@ class Base(models.Model):
 
     class Meta:
         abstract = True
+
+# Concreat base class / Link class to memory (Depecated Label)? 
+class Object(Base):  #NOTE: Replace Base with Object?  Allow either / or?
+    pass
 
 class Algorithm(Base):
     input = None
