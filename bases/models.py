@@ -9,7 +9,9 @@ import base64
 #binascii.b2a_hex
 #base64.b64encode
 
-class Choice(Enum):
+#FIXME: TODO Maybe merge bases project app? 
+
+class Choice(Enum): #NOTE: Link with Object class choice
      @classmethod
      def get_choices(cls):
          return [ (name,value) for (name,value) in enumerate(cls) ]
@@ -18,14 +20,15 @@ class Choice(Enum):
 #FIXME: TODO Refactor Label --> Map / MemoryCell for extra tagging data 
 # TODO: Choose Encoding
 # TODO: need clean up function for Label / Map / MemoryCell / hash namepaces 
-class Label(models.Model):
+class Label(models.Model): #FIXME: TODO --> make this general `abstract` Data class. 
     #FIXME: Label Depecated Switch with memory
     id = models.UUIDField(
         primary_key = True, 
         default = uuid.uuid4, 
         editable = False,
     )
-    #FIXME: TODO # MAKE _data HEX BINARY for better querying
+    #FIXME: TODO # MAKE _data 
+    #FIXME: TODO HEX BINARY for better querying
     data = models.CharField(max_length=32)
 
     #FIXME: TODO 
@@ -58,7 +61,8 @@ class Label(models.Model):
     def name(self):
         return str(self.data)
 
-class Memory(Label): #FIXME: Make memory base class
+# LONG TERM GENERAL MEMORY FOR PROJECT OBJECTS
+class Memory(Label): #FIXME: Make this concreat memory base class
     pass
 
 #register(Label)
