@@ -75,6 +75,7 @@ class Base(models.Model):
         default = uuid.uuid4, 
         editable = False,
     )
+    _object_set = None
 
     #class Namespace(Enum):
         #FIXME: TODO: Use namespace to load custom properties

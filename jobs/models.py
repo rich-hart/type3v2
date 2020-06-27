@@ -63,7 +63,6 @@ class Classification(Job):
     description = "classify the instances in an object set"
     #TODO: classifier = #foriegn key Classifier, try to use Model string name for import.
 
-    _object_set = None
 
 
     @property
