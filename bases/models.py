@@ -13,7 +13,7 @@ class Choice(Enum):
      @classmethod
      def get_choices(cls):
          return [ (name,value) for (name,value) in enumerate(cls) ]
-
+#FIXME: TODO  Memcache
 #NOTE: THIS CLASS DOUBLES AS A HASHTAG DATA STORE
 #FIXME: TODO Refactor Label --> Map / MemoryCell for extra tagging data 
 # TODO: Choose Encoding
@@ -75,6 +75,15 @@ class Base(models.Model):
         default = uuid.uuid4, 
         editable = False,
     )
+
+    #class Namespace(Enum):
+        #FIXME: TODO: Use namespace to load custom properties
+        # at runtime
+    #    pass
+    # namespaces = set()    
+
+
+    #FIXME: TODO: Clean up namespaces
 
     #FIXME:  Auto run register_tags for global modules on startup
     @classmethod
@@ -153,9 +162,13 @@ class Base(models.Model):
     class Meta:
         abstract = True
 
-class Algorithm(models.Model):
+class Algorithm(Base):
     input = None
     output = None
+    # def init
+    # def mantain
+    # def terminate
+
     class Meta:
         abstract = True
 
