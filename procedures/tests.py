@@ -87,8 +87,10 @@ class TestUtils(TestCase):
         self.assertTrue(len(objects))
 
     def test_convert_to_images(self):
-        import ipdb; ipdb.set_trace()
         bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
         file = File.objects.create(parent=bucket,name=TEST_FILE_NAME,format='pdf')
-        images = convert_to_images(0,*[file])
-        self.assertTrue(len(objects))
+        tags = convert_to_images(0,*[file])
+        self.assertTrue(len(tags))
+        image = Image.objects.get(tag=tags[0]) 
+        data = image.cache_client.get(image.tag.hex) 
+        self.assertIsNotNone(data)

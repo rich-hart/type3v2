@@ -60,18 +60,21 @@ def mirror_pdfs(keys):
 def load_file(index, *files):
     file[index].load()
     return files
+from io import BytesIO
+import PIL
 
 def convert_to_images(index, *files):
-    import ipdb; ipdb.set_trace()
+    tags = []
     files[index].load()
     images = files[index].convert()
     for i in range(len(images)):
         name = get_prefix(files[i].name) + '.png'
-        image = Image.objects.create(name = name, parent=files[index])
-        image._array = np.array(images[index])
-        image._raw = image._array.tostring()
+        image = Image.objects.create(name = name, parent=files[index],format='png')
+        images[index]
+        image._pil = images[index]
         image.cache()
-    return images
+        tags.append(image.tag.hex)
+    return tags
 
 def save_image(index, *images):
     file[index].save()
