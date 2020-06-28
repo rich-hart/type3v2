@@ -92,7 +92,9 @@ class Base(models.Model):
         # at runtime
     #    pass
     # namespaces = set()    
-
+    @property
+    def seed(self):
+        return self.tag
 
     #FIXME: TODO: Clean up namespaces
 

@@ -6,6 +6,9 @@ from buckets.models import Bucket, File
 
 from pdf2image import convert_from_path, convert_from_bytes
 
+from .apps import worker_queue
+
+from .utils import *
 SEED = 42
 
 TEST_BUCKET_NAME = 'test-rsftzmqvua'
@@ -23,6 +26,10 @@ class TestUtils(TestCase):
         self.assertIsNotNone(file.raw)
         images = convert_from_bytes(file.raw)
         self.assertTrue(len(images))
+
+    def test_load_task(self):
+        self.assertIn('procedures.utils.debug_task', worker_queue.tasks)
+
 
 
 
