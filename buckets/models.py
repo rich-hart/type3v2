@@ -88,7 +88,7 @@ class File(FSObject):
      
 
 
-class Page(Object): #TEXT
+class Text(File): #TEXT
     # image = 1-1 Image
 
     pass
