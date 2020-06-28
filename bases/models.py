@@ -15,7 +15,23 @@ class Choice(Enum): #NOTE: Link with Object class choice
      @classmethod
      def get_choices(cls):
          return [ (name,value) for (name,value) in enumerate(cls) ]
-#FIXME: TODO  Memcache
+#FIXME: TODO merge Label and Base --> Data
+#                                   class Base(model.Model): #abstract
+#                                       _hash = model.UUIDField(unique=True)
+#                                   class Data(model.Model): #GENERAL DATASTORE FOR TAG MAPPINGS
+#                                       id -> is 1-1 with Base._hash
+#                                       _data = model.CharFiend(max_length=32)
+#FIXME: TODO new object declaration class Object(Base): 
+#                                       @property
+#                                       def namespaces(self):
+#                                           pass
+#                                       @property
+#                                       def tag(self):
+#                                           return self._hash
+#                                       @property
+#                                       def memory(self)->dict: #load properties here:
+#                                           [ setattr(self, k, v) for k,v in self._memory.items()]
+#FIXME: TODO  Memcache                      return self._memory #(pulled from Namespace Data store)
 #NOTE: THIS CLASS DOUBLES AS A HASHTAG DATA STORE
 #FIXME: TODO Refactor Label --> Map / MemoryCell for extra tagging data 
 # TODO: Choose Encoding

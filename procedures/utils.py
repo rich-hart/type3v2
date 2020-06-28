@@ -80,9 +80,11 @@ def ocr(index, *images):
     import ipdb; ipdb.set_trace()
     texts = [None] * len(images)
     images[index].load()
-    data = pytesseract.image_to_data(images[index].pil)
-    raise NotImplementedError('need mongodb')
-    return texts
+    name = get_prefix(images[index].name) + '.tsv'
+    text = Text.objects.create(name = name, parent = images[index] )
+    text._raw = pytesseract.image_to_data(images[index].pil)  
+    text.cache()
+    return [text.tag.hex]
 
 
 def save_image(index, *images):

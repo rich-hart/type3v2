@@ -120,13 +120,13 @@ class File(FSObject):
     def array(self, type):
         return self._array
 
-    def cache(self):
-        output = io.BytesIO() 
-        self._pil.save(output, format = self.format)
-        output.flush()
-        output.seek(0)
-        self._raw = output.read()
-        self.cache_client.set(self.tag.hex, self._raw)
+#    def cache(self):
+#        output = io.BytesIO() 
+#        self._pil.save(output, format = self.format)
+#        output.flush()
+#        output.seek(0)
+#        self._raw = output.read()
+#        self.cache_client.set(self.tag.hex, self._raw)
 
     def convert(self):
         if self.format == File.Format.pdf.value:
@@ -153,9 +153,16 @@ class File(FSObject):
 
 
 class Text(File): #TEXT
-    # image = 1-1 Image
+    class Format(Choice):
+        undefined = None
+        tsv = 'tsv' # ('tsv', 'default') 
+        @classmethod
+        def get_default(cls):
+            return cls.undefined.tsv.value
 
-    pass
+    # image = 1-1 Image
+    def cache(self):
+        self.cache_client.set(self.tag.hex, self._raw)
 
 #import boto3
 # 
@@ -195,6 +202,15 @@ class Image(File):
         png = 'png'
         def get_default(self):
             return self.png.value
+
+    def cache(self):
+        output = io.BytesIO() 
+        self._pil.save(output, format = self.format)
+        output.flush()
+        output.seek(0)
+        self._raw = output.read()
+        self.cache_client.set(self.tag.hex, self._raw)
+
 
     @property
     def pil(self):

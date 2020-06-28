@@ -7,7 +7,7 @@ from django.test import TestCase
 
 from pdf2image import convert_from_path, convert_from_bytes
 import PIL
-from buckets.models import Bucket, File
+from buckets.models import Bucket, File, FSObject
 
 from bases.models import Object
 
@@ -104,4 +104,7 @@ class TestUtils(TestCase):
         image.cache()
         tags = ocr(0,*[image])
         self.assertTrue(len(tags))
-
+        cache = FSObject().cache_client
+        data = cache.get(tags[0])
+        self.assertIsNotNone(data)
+        self.assertIsNotNone(data)
