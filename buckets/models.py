@@ -1,6 +1,6 @@
 import boto3
 from django.db import models
-from bases.models import Base, Object
+from bases.models import Base
 
 #https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html
 #https://www.slsmk.com/use-boto3-to-open-an-aws-s3-file-directly/
@@ -15,18 +15,20 @@ from bases.models import Base, Object
 #    class Meta:
 #        abstract = True
 
+# Concreat base class / Link class to memory (Depecated Label)? 
+class Object(Base):  #NOTE: Replace Base with Object?  Allow either / or?
+    name = models.CharField(max_length=2**6)
 
 
 class FSObject(Object):
-#    name = models.CharField(max_length=2**6)
-    class Meta:
-        abstract = True
+    parent = models.ForeignKey(Object, on_delete=models.CASCADE,null=True,related_name='+')
+
 
 class Bucket(FSObject):
     pass
 
 class Folder(FSObject):
-    parent = models.ForeignKey(Bucket, on_delete=models.CASCADE,null=True)
+#    parent = models.ForeignKey(FSObject, on_delete=models.CASCADE,null=True,related_name='+')
 
     @property
     def bucket(self):
@@ -40,7 +42,8 @@ class File(FSObject):
     _raw = None
     _array = None
     _client = None
-    parent = models.ForeignKey(Folder, on_delete=models.CASCADE,null=True)
+#    parent = models.ForeignKey(Folder, on_delete=models.CASCADE,null=True)
+#    parent = models.ForeignKey(FSObject, on_delete=models.CASCADE,null=True)
 
 #    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
 
