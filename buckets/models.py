@@ -1,10 +1,13 @@
 from enum import Enum
+import io
+import pickle
 import boto3
 from django.conf import settings
 from django.db import models
 from bases.models import Object, Choice
 from typing import List
 from project.storage_backends import StaticStorage
+from pdf2image import convert_from_path, convert_from_bytes
 #https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html
 #https://www.slsmk.com/use-boto3-to-open-an-aws-s3-file-directly/
 
@@ -27,6 +30,9 @@ class FSObject(Object):
     @property
     def key(self):
         return self.name
+
+    def cache(self):
+        raise NotImplementedError
 
 
     @staticmethod
@@ -101,6 +107,22 @@ class File(FSObject):
     def array(self, type):
         return self._array
 
+    def pickle(self):
+        #io.BytesIO(b"some initial binary data: \x00\x01")
+        stream = io.BytesIO()
+        pickle.dump(self._array, stream)
+        self._raw = stream.read()
+
+    def cache(self):
+        self.pickle()
+        raise NotImplementedError
+
+    def convert(self):
+        if self.format == Format.pdf.value:
+            return convert_from_bytes(self._raw)
+        else:
+            raise NotImplementedError
+
     def load(self):
         if isinstance(self.root, Bucket): 
             fileobj = self.client.get_object(
@@ -151,8 +173,6 @@ class Text(File): #TEXT
 #        pass
 class Image(File):
 
-    def cache(self):
-        raise NotImplementedError
 
     def save(self):
         raise NotImplementedError('CHECK ME')

@@ -38,8 +38,12 @@ def get_ext(path):
     tokens = os.path.basename(path).split(os.extsep)
     if len(tokens) ==2:
         return tokens[1]
-def sync_pdfs(keys):
-    import ipdb; ipdb.set_trace()
+
+def get_prefix(path):
+    tokens = os.path.basename(path).split(os.extsep)
+    return tokens[0]
+
+def mirror_pdfs(keys):
 #    for key in keys:
     folder_keys = [os.path.dirname(p) for p in keys if get_ext(p)=='pdf']     
     pdf_keys = [os.path.basename(p) for p in keys if get_ext(p)=='pdf']     
@@ -48,10 +52,28 @@ def sync_pdfs(keys):
         if folder_key:
             parent = Folder.objects.create(name=folder_key)
         else:
-            raise NotImplementedError
+            parent = None #FIXME: NEED TO LINK TO BUCKET
         file = File.objects.create(name=pdf_key,format='pdf',parent=parent)
         files.append(file)
     return files
+
+def load_file(index, *files):
+    file[index].load()
+    return files
+
+def convert_to_images(index, *files):
+    images = files[index].convert()
+    for i in range(len(images)):
+        name = get_prefix(images[i].name) + '.pdf'
+        image = Image(name = name, parent=files[index]) 
+        image.cache()
+    return images
+
+def save_image(index, *images):
+    file[index].save()
+    return images
+
+
 
 @worker_queue.task
 def walk(buckets: HashObjects, index: int) -> HashObjects:
