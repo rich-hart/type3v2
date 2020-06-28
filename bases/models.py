@@ -174,7 +174,8 @@ class Base(models.Model):
 
 # Concreat base class / Link class to memory (Depecated Label)? 
 class Object(Base):  #NOTE: Replace Base with Object?  Allow either / or?
-    pass
+    name = models.CharField(max_length=2**6)
+
 
 class Algorithm(Base):
     input = None

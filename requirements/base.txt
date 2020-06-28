@@ -3,3 +3,4 @@ djangorestframework
 django-tagging
 django_filter
 #django-filters
+boto3
