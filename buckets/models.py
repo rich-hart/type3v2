@@ -60,7 +60,7 @@ class File(FSObject):
 
     @property
     def client(self):
-        if self._client:
+        if not self._client:
             self._client = boto3.client(
                 's3',
                 region_name=settings.AWS_REGION,
@@ -70,20 +70,21 @@ class File(FSObject):
         return self._client
        
     @property
-    def raw(self, type):
+    def raw(self):
         return self._raw
 
     @property
     def array(self, type):
         return self._array
 
-    def load(self, type):
-        fileobj = s3client.get_object(
-            Bucket=self.folder.bucket.name,
-            Key=self.file,
-        )
-        self._raw = fileobj['Body'].read() 
-        self._array = None
+    def load(self):
+        if isinstance(self.root, Bucket): 
+            fileobj = self.client.get_object(
+                Bucket=self.root.name,
+                Key=self.name,
+            )
+            self._raw = fileobj['Body'].read() 
+            #self._array = None
      
 
 
