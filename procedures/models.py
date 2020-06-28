@@ -15,3 +15,30 @@ from django.db import models
 
 # class Procedure # is many schedules 
 
+import celery
+#NOTE: https://docs.celeryproject.org/en/stable/userguide/tasks.html#bound-tasks
+logger = get_task_logger(__name__)
+
+#A task being bound means the first argument to the task will always be the task instance (self), just like Python bound methods:
+
+@task(bind=True)
+def add(self, x, y):
+    logger.info(self.request.id)
+
+class MyTask(celery.Task):
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        print('{0!r} failed: {1!r}'.format(task_id, exc))
+
+@task(base=MyTask)
+def add(x, y):
+    raise KeyError()
+
+
+#NOTE: https://docs.celeryproject.org/en/stable/userguide/tasks.html#names
+#>>> @app.task(name='sum-of-two-numbers')
+#>>> def add(x, y):
+#...     return x + y
+
+#>>> add.name
+#'sum-of-two-numbers'

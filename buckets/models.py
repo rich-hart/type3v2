@@ -126,7 +126,15 @@ class Text(File): #TEXT
 #    def __call__(self):
 #        pass
 class Image(File):
-    pass 
+
+    def cache(self):
+        raise NotImplementedError
+
+    def save(self):
+        raise NotImplementedError('CHECK ME')
+    #FIXME: TODO Does it make sense to put cache here?  or in worker?
+        self.cache()
+        super(self,Image).save()
 
 class Audio(File):
     # format = choices: MP3
