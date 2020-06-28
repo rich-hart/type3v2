@@ -48,7 +48,8 @@ class TestUtils(TestCase):
     def test_task_walk(self):
         bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
         file = File.objects.create(parent=bucket,name=TEST_FILE_NAME)
-        self.target('walk',[bucket.tag])
-
+        expected = [file.tag]
+        returned = self.target('walk',[bucket.tag])
+        self.assertListEqual(expected, returned)
 
 
