@@ -2,10 +2,11 @@ import random
 from celery import signature
 from unittest import mock
 
+from django.conf import settings
 from django.test import TestCase
 
 from pdf2image import convert_from_path, convert_from_bytes
-
+import PIL
 from buckets.models import Bucket, File
 
 from bases.models import Object
@@ -17,7 +18,7 @@ SEED = 42
 
 TEST_BUCKET_NAME = 'test-rsftzmqvua'
 TEST_FILE_NAME = 'test.pdf'
-
+TEST_DATA_DIR = os.path.join(os.getcwd(),'data','tests')
 random.seed(SEED)
 
 
@@ -94,3 +95,13 @@ class TestUtils(TestCase):
         image = Image.objects.get(tag=tags[0]) 
         data = image.cache_client.get(image.tag.hex) 
         self.assertIsNotNone(data)
+
+    def test_ocr_images(self):
+        path = os.path.join(TEST_DATA_DIR,'test.png')
+        pil = PIL.Image.open(path)
+        image = Image.objects.create(name=TEST_FILE_NAME,format='png')
+        image._pil = pil
+        image.cache()
+        tags = ocr(0,*[image])
+        self.assertTrue(len(tags))
+

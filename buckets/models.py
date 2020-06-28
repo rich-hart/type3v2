@@ -10,6 +10,7 @@ from bases.models import Object, Choice
 from typing import List
 from project.storage_backends import StaticStorage
 from pdf2image import convert_from_path, convert_from_bytes
+import PIL
 #https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html
 #https://www.slsmk.com/use-boto3-to-open-an-aws-s3-file-directly/
 
@@ -90,6 +91,9 @@ class File(FSObject):
     class Format(Choice):
         undefined = None
         pdf = 'pdf'
+        @classmethod
+        def get_default(cls):
+            return cls.undefined.value
     format = None
     _raw = None
     _array = None
@@ -99,7 +103,7 @@ class File(FSObject):
         null = True,
         #choices=Status, #TODO fix this, make PR to django official cite
         choices=Format.get_choices(),
-        default=Format.undefined.value,
+        default=Format.get_default(),
     )
     _path = models.FileField(storage=StaticStorage())
 #    parent = models.ForeignKey(Folder, on_delete=models.CASCADE,null=True)
@@ -133,6 +137,8 @@ class File(FSObject):
     def load(self):
         self._raw = self.cache_client.get(self.tag.hex)
         if self._raw:
+            input = io.BytesIO(self._raw)
+            self._pil = PIL.Image.open(input)
             return
         elif isinstance(self.root, Bucket): 
             fileobj = self.s3_client.get_object(
@@ -187,6 +193,12 @@ class Image(File):
     class Format(Choice):
         undefined = None
         png = 'png'
+        def get_default(self):
+            return self.png.value
+
+    @property
+    def pil(self):
+        return self._pil
 
 #    def save(self):
 #        raise NotImplementedError('CHECK ME')

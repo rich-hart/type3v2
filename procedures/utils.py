@@ -1,6 +1,6 @@
 import os
 from typing import List
-
+import pytesseract
 
 from bases.models import Object
 from buckets.models import *
@@ -76,6 +76,15 @@ def convert_to_images(index, *files):
         tags.append(image.tag.hex)
     return tags
 
+def ocr(index, *images):
+    import ipdb; ipdb.set_trace()
+    texts = [None] * len(images)
+    images[index].load()
+    data = pytesseract.image_to_data(images[index].pil)
+    raise NotImplementedError('need mongodb')
+    return texts
+
+
 def save_image(index, *images):
     file[index].save()
     return images
@@ -99,10 +108,10 @@ def save(index, *images):
     raise NotImplementedError
     return images
 
-@worker_queue.task
-def ocr(index,*images):
-    raise NotImplementedError
-    return texts
+#@worker_queue.task
+#def ocr(index,*images):
+#    raise NotImplementedError
+#    return texts
 
 @worker_queue.task
 def tfidf(index, *texts):
