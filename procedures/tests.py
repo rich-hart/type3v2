@@ -4,7 +4,7 @@ from unittest import mock
 
 from django.test import TestCase
 
-
+from pdf2image import convert_from_path, convert_from_bytes
 
 from buckets.models import Bucket, File
 
@@ -70,7 +70,13 @@ class TestUtils(TestCase):
     def test_task_walk(self):
         bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
         file = File.objects.create(parent=bucket,name=TEST_FILE_NAME)
-        expected = [file.tag]
+        expected = [
+                    'folder_0/',
+                    'folder_0/folder_1/',
+                    'folder_0/folder_1/sample.pdf',
+                    'folder_0/folder_2/',
+                    'test.pdf',
+        ]
         returned = self.target('list_objects',0, [bucket.tag])
         self.assertListEqual(expected, returned)
 
