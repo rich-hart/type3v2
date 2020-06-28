@@ -17,7 +17,7 @@ class ClassificationView(TestCase):
         self.fail("NotImplementedError")
 
 
-#    @unittest.skip("Patch test view broken, dev works")
+    @unittest.skip("Patch test view broken, dev works")
     def test_start_job(self):
         import ipdb; ipdb.set_trace()
         factory = APIRequestFactory()
