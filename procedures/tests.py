@@ -25,9 +25,9 @@ random.seed(SEED)
 class TestUtils(TestCase):
     def target(self, task_name, objects, index=0):
         import ipdb; ipdb.set_trace()
-        task = globals()[task_name]
-        objects = task(objects,index)
+        objects = process(objects, index, task_name)
         return objects
+
     def test_pdf_convert(self):
         bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
         file = File.objects.create(parent=bucket,name=TEST_FILE_NAME)

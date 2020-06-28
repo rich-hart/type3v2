@@ -2,7 +2,7 @@ import boto3
 from django.conf import settings
 from django.db import models
 from bases.models import Object
-
+from typing import List
 #https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html
 #https://www.slsmk.com/use-boto3-to-open-an-aws-s3-file-directly/
 
@@ -32,6 +32,10 @@ class FSObject(Object):
     @property
     def root(self):
         return self._root(self)
+
+    def walk(self) -> List[Object]:
+        raise NotImplementedError
+
         
 
 class Bucket(FSObject):
