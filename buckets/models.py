@@ -1,5 +1,6 @@
 from enum import Enum
 import io
+import numpy as np
 import pickle
 import boto3
 from django.conf import settings
@@ -107,18 +108,14 @@ class File(FSObject):
     def array(self, type):
         return self._array
 
-    def pickle(self):
-        #io.BytesIO(b"some initial binary data: \x00\x01")
-        stream = io.BytesIO()
-        pickle.dump(self._array, stream)
         self._raw = stream.read()
 
     def cache(self):
-        self.pickle()
+        import ipdb; ipdb.set_trace()
         raise NotImplementedError
 
     def convert(self):
-        if self.format == Format.pdf.value:
+        if self.format == File.Format.pdf.value:
             return convert_from_bytes(self._raw)
         else:
             raise NotImplementedError
@@ -129,7 +126,9 @@ class File(FSObject):
                 Bucket=self.root.name,
                 Key=self.name,
             )
-            self._raw = fileobj['Body'].read() 
+            self._raw = fileobj['Body'].read()
+        else:
+            raise NotImplementedError  
             #self._array = None
      
 
@@ -172,13 +171,15 @@ class Text(File): #TEXT
 #    def __call__(self):
 #        pass
 class Image(File):
+    class Format(Choice):
+        undefined = None
+        png = 'png'
 
-
-    def save(self):
-        raise NotImplementedError('CHECK ME')
+#    def save(self):
+#        raise NotImplementedError('CHECK ME')
     #FIXME: TODO Does it make sense to put cache here?  or in worker?
-        self.cache()
-        super(self,Image).save()
+#        self.cache()
+#        super(self,Image).save()
 
 class Audio(File):
     # format = choices: MP3

@@ -62,10 +62,14 @@ def load_file(index, *files):
     return files
 
 def convert_to_images(index, *files):
+    import ipdb; ipdb.set_trace()
+    files[index].load()
     images = files[index].convert()
     for i in range(len(images)):
-        name = get_prefix(images[i].name) + '.pdf'
-        image = Image(name = name, parent=files[index]) 
+        name = get_prefix(files[i].name) + '.png'
+        image = Image.objects.create(name = name, parent=files[index])
+        image._array = np.array(images[index])
+        image._raw = image._array.tostring()
         image.cache()
     return images
 

@@ -85,3 +85,10 @@ class TestUtils(TestCase):
         keys = bucket.list_objects()
         objects = mirror_pdfs(keys)
         self.assertTrue(len(objects))
+
+    def test_convert_to_images(self):
+        import ipdb; ipdb.set_trace()
+        bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
+        file = File.objects.create(parent=bucket,name=TEST_FILE_NAME,format='pdf')
+        images = convert_to_images(0,*[file])
+        self.assertTrue(len(objects))
