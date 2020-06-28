@@ -19,15 +19,16 @@ ModelObjects = List[Object]
 #FIXME TODO Decorate index!!!
 # FIXME TODO Make general process factory for scheduling
 
-def retrieve(index, *objects):
+def retrieve(index, *objects, cast='fsobject'):
     object = objects[index]
-    if isinstance(object, Object):
-        return object
-    raise NotImplementedError('need to figure out object loading')
-
+    if not isinstance(object, Object):
+        raise NotImplementedError('need to figure out object loading')
+    if cast:
+        object = getattr(object,cast)
+    return object
 def process(objects: HashObjects, index: int, method: str) -> HashObjects: #TODO: options
     object = retrieve(index, *objects)
-    objects = getattr(object, method)()
+    objects = getattr(object.fsobject, method)()
     return objects
 
 @worker_queue.task

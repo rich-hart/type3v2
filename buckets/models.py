@@ -20,6 +20,7 @@ from typing import List
 
 class FSObject(Object):
     parent = models.ForeignKey('buckets.FSObject', on_delete=models.CASCADE, null=True, related_name='+')
+    _client = None
 
     @staticmethod
     def _root(object):
@@ -36,7 +37,17 @@ class FSObject(Object):
     def walk(self) -> List[Object]:
         raise NotImplementedError
 
-        
+    @property
+    def client(self):
+        if not self._client:
+            self._client = boto3.client(
+                's3',
+                region_name=settings.AWS_REGION,
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            )
+        return self._client
+       
 
 class Bucket(FSObject):
     pass
@@ -56,22 +67,11 @@ class File(FSObject):
     format = None
     _raw = None
     _array = None
-    _client = None
 #    parent = models.ForeignKey(Folder, on_delete=models.CASCADE,null=True)
 #    parent = models.ForeignKey(FSObject, on_delete=models.CASCADE,null=True)
 
 #    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
 
-    @property
-    def client(self):
-        if not self._client:
-            self._client = boto3.client(
-                's3',
-                region_name=settings.AWS_REGION,
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            )
-        return self._client
        
     @property
     def raw(self):
