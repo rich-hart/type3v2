@@ -19,7 +19,7 @@ from bases.models import Object
 
 
 class FSObject(Object):
-    parent = models.ForeignKey('buckets.FSObject', on_delete=models.CASCADE, related_name='+')
+    parent = models.ForeignKey('buckets.FSObject', on_delete=models.CASCADE, null=True, related_name='+')
 
     @staticmethod
     def _root(object):
