@@ -80,4 +80,9 @@ class TestUtils(TestCase):
         returned = self.target('list_objects',0, [bucket.tag])
         self.assertListEqual(expected, returned)
 
+    def test_sync_pdfs(self):
+        import ipdb; ipdb.set_trace()
+        bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
+        keys = bucket.list_objects()
+        objects = sync_pdfs(keys)
 

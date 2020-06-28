@@ -1,7 +1,9 @@
+import os
 from typing import List
 
 
 from bases.models import Object
+from buckets.models import *
 from .apps import worker_queue
 
 
@@ -31,6 +33,25 @@ def process(objects: HashObjects, index: int, method: str) -> HashObjects: #TODO
     object = retrieve(index, *objects)
     objects = getattr(object, method)()
     return objects
+
+def get_ext(path):
+    tokens = os.path.basename(path).split(os.extsep)
+    if len(tokens) ==2:
+        return tokens[1]
+def sync_pdfs(keys):
+    import ipdb; ipdb.set_trace()
+#    for key in keys:
+    folder_keys = [os.path.dirname(p) for p in keys if get_ext(p)=='pdf']     
+    pdf_keys = [os.path.basename(p) for p in keys if get_ext(p)=='pdf']     
+    files = []
+    for folder_key, pdf_key in zip(folder_keys, pdf_keys):
+        if folder_key:
+            parent = Folder.objects.create(name=folder_key)
+        else:
+            raise NotImplementedError
+        file = File.objects.create(name=pdf_key,format='pdf',parent=parent)
+        files.append(file)
+    return files
 
 @worker_queue.task
 def walk(buckets: HashObjects, index: int) -> HashObjects:
