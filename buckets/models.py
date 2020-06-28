@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 from bases.models import Object, Choice
 from typing import List
-
+from project.storage_backends import StaticStorage
 #https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html
 #https://www.slsmk.com/use-boto3-to-open-an-aws-s3-file-directly/
 
@@ -86,7 +86,7 @@ class File(FSObject):
         choices=Format.get_choices(),
         default=Format.undefined.value,
     )
-
+    _path = models.FileField(storage=StaticStorage())
 #    parent = models.ForeignKey(Folder, on_delete=models.CASCADE,null=True)
 #    parent = models.ForeignKey(FSObject, on_delete=models.CASCADE,null=True)
 

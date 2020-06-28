@@ -26,6 +26,7 @@ def retrieve(index, *objects, cast='fsobject'):
     if cast:
         object = getattr(object,cast)
     return object
+
 def process(objects: HashObjects, index: int, method: str) -> HashObjects: #TODO: options
     object = retrieve(index, *objects)
     objects = getattr(object, method)()

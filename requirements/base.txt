@@ -2,4 +2,4 @@ django
 djangorestframework
 django-tagging
 django_filter
-
+django-storages
