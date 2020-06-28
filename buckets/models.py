@@ -1,6 +1,7 @@
 import boto3
+from django.conf import settings
 from django.db import models
-from bases.models import Base
+from bases.models import Object
 
 #https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html
 #https://www.slsmk.com/use-boto3-to-open-an-aws-s3-file-directly/
@@ -15,24 +16,34 @@ from bases.models import Base
 #    class Meta:
 #        abstract = True
 
-# Concreat base class / Link class to memory (Depecated Label)? 
-class Object(Base):  #NOTE: Replace Base with Object?  Allow either / or?
-    name = models.CharField(max_length=2**6)
 
 
 class FSObject(Object):
-    parent = models.ForeignKey(Object, on_delete=models.CASCADE,null=True,related_name='+')
+    parent = models.ForeignKey('buckets.FSObject', on_delete=models.CASCADE, related_name='+')
 
+    @staticmethod
+    def _root(object):
+        parent = getattr(object,'parent',None)
+        if parent:
+            return object._root(parent)
+        else:
+            return object
+
+    @property
+    def root(self):
+        return self._root(self)
+        
 
 class Bucket(FSObject):
     pass
 
 class Folder(FSObject):
+     pass
 #    parent = models.ForeignKey(FSObject, on_delete=models.CASCADE,null=True,related_name='+')
 
-    @property
-    def bucket(self):
-        return self.parent
+#    @property
+#    def bucket(self):
+#        return self.parent
 # TODO: FIXME!!! 
 # Use binary stream of from boto3 to pull in data to general file
 # data from aws
@@ -49,10 +60,12 @@ class File(FSObject):
 
     @property
     def client(self):
-        if type=='s3' and not self._client:
+        if self._client:
             self._client = boto3.client(
                 's3',
-                region_name='us-east-1'
+                region_name=settings.AWS_REGION,
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
             )
         return self._client
        
@@ -74,7 +87,7 @@ class File(FSObject):
      
 
 
-class Page(Base): #TEXT
+class Page(Object): #TEXT
     # image = 1-1 Image
 
     pass

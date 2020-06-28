@@ -83,6 +83,7 @@ class Base(models.Model):
         default = uuid.uuid4, 
         editable = False,
     )
+    namespaces = set()
     # Move to objects
     _object_set = None
 
@@ -172,7 +173,11 @@ class Base(models.Model):
     class Meta:
         abstract = True
 
-
+# Concreat base class / Link class to memory (Depecated Label)? 
+class Object(Base):  #NOTE: Replace Base with Object?  Allow either / or?
+    name = models.CharField(max_length=2**6)
+#    class Meta:
+#        abstract = True
 
 class Algorithm(Base):
     input = None
