@@ -36,8 +36,9 @@ random.seed(SEED)
 def mock_retrieve(index, *tags):
     tag = tags[index]
     object = Object.objects.get(tag=tag)
-    object = getattr(object,'fsobject')
-    return object
+    fsobject = getattr(object,'fsobject')
+    bucket = getattr(fsobject,'bucket')
+    return bucket
 
 # FIXME: TODO Use a LOT of mocking in tests.  I mean A LOT.
 # NEED TO EXPLICETLY DECLAIR AND TEST Worker object iteration, / iterable.  
@@ -70,7 +71,7 @@ class TestUtils(TestCase):
         bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
         file = File.objects.create(parent=bucket,name=TEST_FILE_NAME)
         expected = [file.tag]
-        returned = self.target('walk',0, [bucket.tag])
+        returned = self.target('list_objects',0, [bucket.tag])
         self.assertListEqual(expected, returned)
 
 

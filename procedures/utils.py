@@ -28,7 +28,7 @@ def retrieve(index, *objects, cast='fsobject'):
     return object
 def process(objects: HashObjects, index: int, method: str) -> HashObjects: #TODO: options
     object = retrieve(index, *objects)
-    objects = getattr(object.fsobject, method)()
+    objects = getattr(object, method)()
     return objects
 
 @worker_queue.task

@@ -1,8 +1,10 @@
+from enum import Enum
 import boto3
 from django.conf import settings
 from django.db import models
-from bases.models import Object
+from bases.models import Object, Choice
 from typing import List
+
 #https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html
 #https://www.slsmk.com/use-boto3-to-open-an-aws-s3-file-directly/
 
@@ -22,6 +24,11 @@ class FSObject(Object):
     parent = models.ForeignKey('buckets.FSObject', on_delete=models.CASCADE, null=True, related_name='+')
     _client = None
 
+    @property
+    def key(self):
+        return self.name
+
+
     @staticmethod
     def _root(object):
         parent = getattr(object,'parent',None)
@@ -34,8 +41,7 @@ class FSObject(Object):
     def root(self):
         return self._root(self)
 
-    def walk(self) -> List[Object]:
-        raise NotImplementedError
+
 
     @property
     def client(self):
@@ -50,7 +56,10 @@ class FSObject(Object):
        
 
 class Bucket(FSObject):
-    pass
+    def list_objects(self) -> List[str]:
+        objects = self.client.list_objects(Bucket=self.name)
+        keys = [ o['Key'] for o in objects['Contents'] ]
+        return keys
 
 class Folder(FSObject):
      pass
@@ -64,9 +73,20 @@ class Folder(FSObject):
 # data from aws
 # FIXME: DO NOT WRITE TO HOST FS!!!!
 class File(FSObject):
+    class Format(Choice):
+        undefined = None
+        pdf = 'pdf'
     format = None
     _raw = None
     _array = None
+    format = models.CharField(
+        max_length=3,
+        null = True,
+        #choices=Status, #TODO fix this, make PR to django official cite
+        choices=Format.get_choices(),
+        default=Format.undefined.value,
+    )
+
 #    parent = models.ForeignKey(Folder, on_delete=models.CASCADE,null=True)
 #    parent = models.ForeignKey(FSObject, on_delete=models.CASCADE,null=True)
 
