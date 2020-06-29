@@ -107,6 +107,7 @@ def tfidf(*tags):
     vectors = tool.fit_transform(corpus)
     labels = tool.get_feature_names()
     model = TfIDF.objects.create()
+    model.store(tool, labels, vectors)
     #FIXME TODO save tool labels
     #db = tool.mongo_client[settings.MONGODB_NAME]
     # FIXME: TODO Need to save vectorizer pickle
@@ -121,9 +122,9 @@ def tfidf(*tags):
 #    db = client['test-database']
 #    collection = db['test-collection']
 #    collection = tool.mongo_client[tool.class_name]
-    model.store(labels)
-    model.store(vectors)
-    model.store(tool)
+    #model.store(labels)
+    #model.store(vectors)
+    #model.store(tool)
     return [model.tag]
 
 

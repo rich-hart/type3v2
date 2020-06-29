@@ -1,9 +1,10 @@
 import uuid
+from django.conf import settings
 from django.db import models
 from tagging.models import Tag, TaggedItem
 from tagging.registry import register
 from django.apps import apps
-
+from pymemcache.client.base import Client as MemcacheClient
 from enum import Enum
 import base64
 #binascii.b2a_hex
@@ -71,6 +72,13 @@ class Label(models.Model): #FIXME: TODO --> make this general `abstract` Data cl
         return string
 
     @staticmethod
+    def encode(string):
+        string = string.encode('utf-8')
+        string = base64.b64encode(string)
+        string = string.decode('utf-8')
+        return string
+
+    @staticmethod
     def decode(data):
         decoding = base64.b64decode(data).decode('utf-8')
         return decoding
@@ -81,13 +89,14 @@ class Label(models.Model): #FIXME: TODO --> make this general `abstract` Data cl
         return str(self.data)
 
 # LONG TERM GENERAL MEMORY FOR PROJECT OBJECTS
+ROOT_NAMESPACE = ''
+
 class Space(Enum):
 #    ROOT = 'PROJECT_' #FIXME cant get superclass of root to work
-    ROOT = ''
 
     @property
     def hash(self):
-        value = self.ROOT + self.value
+        value = self.value + ROOT_NAMESPACE
         return uuid.uuid3(uuid.NAMESPACE_DNS, value).hex
 #    def __init__(self, value):
 #        import ipdb; ipdb.set_trace()
@@ -103,35 +112,48 @@ class Space(Enum):
 #            setattr(namespace, namespace.name, value)
 #            uuid = uuid.uuid3(uuid.NAMESPACE_DNS, value)
 #            setattr(namespace, 'uuid', uuid.hex)
-
+#__global_memcache_client = MemcacheClient((settings.MEMCACHED_HOST, settings.MEMCACHED_PORT))
 class Memory(Label): #FIXME: Make this concreat memory base class
 #    _cache = None
-    _cache_client = None
 
-    @property
-    def cache_client(self):
-        if not self._cache_client:
-            self._cache_client = Client((settings.MEMCACHED_HOST, settings.MEMCACHED_PORT))
-        return self._cache_client
+    __global_memcache_client = MemcacheClient((settings.MEMCACHED_HOST, settings.MEMCACHED_PORT))
+    ROOT_NAMESPACE = ROOT_NAMESPACE
+
+    #@classmethod
+    #def cache_client(cls):
+        #if not cls._cache_client:
+        #    cls._cache_client = __global_memcache_client
+        #return cls._cache_client
+
+#    @property
+#    def cache_client(self):
+#        if not self._cache_client:
+#            self._cache_client = Client((settings.MEMCACHED_HOST, settings.MEMCACHED_PORT))i
+#        return self._cache_client
 
 #    class Namespace(Space):
 #        pass
     #NOTE, check class decorators
 
-    def memory_id(self, space):
-        return uuid.uuid3(space.hash,self.id)
+#    def memory_id(self, space):
+#        return uuid.uuid3(space.hash,self.id)
 
     def retrieve(self, space):
         hash = self.memory_id(space)
-        data = self.cache_client.get(id = hash)
+        data = Memory.__global_memcache_client.get(hash)
         if not data:
             data = Memory.objects.get(id=hash).data
         return data
-       
-    def store(self, space, data):
-        hash = self.memory_id(space)
-        self.cache_client.set(id=hash, data=data)
-        Memory.objects.update_or_create(id=hash, data=data)
+    @staticmethod
+    def get_address(space, hash):
+        return uuid.uuid3(space,hash.hex)
+
+#    @c
+#    def cache(self, hash, space, data):
+        #hash = address.memory_id(space)
+#        address = uuid.uuid3(space,hash.hex)
+#        cls.__global_memcache_client.set(address.hex, data)
+#        cls.objects.update_or_create(id=address, data=data)
  
 
 
