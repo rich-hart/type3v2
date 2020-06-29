@@ -156,5 +156,6 @@ class TestUtils(TestCase):
                 r_text.cache()
                 tags.append(r_text.tag.hex)
 #        with self.settings(MONGODB_NAME='test_'+gen_rand_str()):
-        vectors, labels = tfidf(*tags)
+        [tag] = tfidf(*tags)
+
 

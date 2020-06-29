@@ -38,6 +38,11 @@ class TfIDF(Tool):
         default = uuid.uuid4,
         editable = False,
     )
+    @property
+    def vectors(self):
+        if not self._vectors:
+            self._vectors = self.collection[self.address]
+        return self._vectors
 
     #@classmethod
     def store(self, tool, labels, vectors):
@@ -51,8 +56,10 @@ class TfIDF(Tool):
         self.save()
         array = vectors.toarray()
         frame = pd.DataFrame(array)
-        frame.to_json(stream)
-        self.collection.insert_many(frame.rename(columns=dict(enumerate(labels))).to_dict('records'))
+        #frame.to_json(stream)
+        records = frame.rename(columns=dict(enumerate(labels))).to_dict('records')
+#        self.collection[self.address]  
+        self.vectors.insert_many(records)
         #self.collection.insert(???)
 
     # NOTE: Need to move to Base Object class
@@ -93,9 +100,9 @@ class TfIDF(Tool):
     def corpus(self):
         raise NotImplementedError()
 
-    @property
-    def vectors(self):
-        raise NotImplementedError()
+#    @property
+#    def vectors(self):
+#        raise NotImplementedError()
 
     @property
     def labels(self):
