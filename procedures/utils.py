@@ -1,9 +1,11 @@
 import os
 from typing import List
+import pymongo
 import pytesseract
 import pandas
 from bases.models import Object
 from buckets.models import *
+from tools.models import *
 from .apps import worker_queue
 
 
@@ -88,6 +90,7 @@ def ocr(index, *images):
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 def tfidf(*tags):
+    import ipdb; ipdb.set_trace()
     texts = [Text.objects.get(tag=t) for t in tags ]
     corpus = []
     for text in texts:
@@ -102,9 +105,13 @@ def tfidf(*tags):
     )
     vectors = vectorizer.fit_transform(corpus)
     labels = vectorizer.get_feature_names()
+    tool = TfIDF.objects.create()
+    #FIXME TODO save tool labels
+    db = tool.mongo_client[settings.MONGODB_NAME]
     # FIXME: TODO Need to save vectorizer pickle
     #  X_train_vectors = vectorizer.fit_transform(X_train_corpus)
     #  X_test_vectors = vectorizer.transform(X_test_corpus)
+    
     return vectors, labels
 
 

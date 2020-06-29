@@ -2,6 +2,8 @@ import random
 import string
 from celery import signature
 from unittest import mock
+from django.test import TestCase, override_settings
+
 
 from django.conf import settings
 from django.test import TestCase
@@ -52,8 +54,23 @@ def mock_retrieve(index, *tags):
 # NOTE This will allow for proper syntax unit testing, without needing live workers
 import csv
 
- 
+
+@override_settings(MONGODB_NAME='test_'+gen_rand_str()) 
 class TestUtils(TestCase):
+
+    @classmethod
+    def setUpClass(cls,*args,**kwargs):
+        super(cls, TestUtils).setUpClass(*args,**kwargs)
+        m_client = FSObject().mongo_client
+        self.mongodb = m_client[self.settings.MONGODB_NAME]
+
+    @classmethod
+    def setUpClass(cls,*args,**kwargs):
+        super(cls, TestUtils).setUpClass(*args,**kwargs)
+        m_client = FSObject().mongo_client
+        self.mongodb = m_client[self.settings.MONGODB_NAME]
+        mongo_client.drop_database(self.settings.MONGODB_NAME)
+
     @mock.patch('procedures.utils.retrieve', side_effect=mock_retrieve)
     def target(self, task_name, index, objects, *args):
         objects = process(objects, index, task_name)
@@ -136,5 +153,6 @@ class TestUtils(TestCase):
                 r_text._raw = r_text._frame.to_csv(sep='\t')
                 r_text.cache()
                 tags.append(r_text.tag.hex)
-        vectors, labels = tfidf(*tags)
+        with self.settings(MONGODB_NAME='test_'+gen_rand_str()):
+            vectors, labels = tfidf(*tags)
 

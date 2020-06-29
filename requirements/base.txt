@@ -4,3 +4,4 @@ django-tagging
 django_filter
 django-storages
 numpy
+pymongo

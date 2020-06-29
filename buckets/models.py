@@ -31,6 +31,7 @@ class FSObject(Object):
     parent = models.ForeignKey('buckets.FSObject', on_delete=models.CASCADE, null=True, related_name='+')
     _s3_client = None
     _cache_client = None
+    _mongo_client = None
 
     @property
     def key(self):
@@ -53,6 +54,11 @@ class FSObject(Object):
         return self._root(self)
 
 
+    @property
+    def mongo_client(self):
+        if not self._mongo_client:
+            self._mongo_client = MongoClient(settings.MONGODB_HOST,settings.MONGODB_PORT)
+        return self._mongo_client
 
     @property
     def s3_client(self):

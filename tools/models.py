@@ -1,15 +1,16 @@
 from enum import Enum
+from pymongo import MongoClient
 from django.db import models
 from project.storage_backends import StaticStorage
 
-
+from buckets.models import FSObject
 
 #https://docs.celeryproject.org/en/stable/userguide/configuration.html#conf-cache-result-backend
 # PREPROSESSING TOOLS
-class Tool(models.Model):
+from django.conf import settings
+class Tool(FSObject):
     # COMPUTER VISION
     # NLP
-   
     pass
 
 class NLP(Tool):
@@ -18,7 +19,9 @@ class NLP(Tool):
 class TfIDF(Tool):
     _vectorizer = models.FileField(storage=StaticStorage())
     _labels = None
+
     NAMESPACE_ROOT = 'TFIDF_' #FIXME: TODO: Not implemented  
+
     class Namespace(Enum):
         LABELS = 'LABELS'
 
@@ -28,6 +31,7 @@ class TfIDF(Tool):
 
     @property
     def vectorizer(self):
+        raise NotImplementedError
         return self._vectorizer
 
     @property

@@ -29,7 +29,10 @@ DEFAULT_FILE_STORAGE = 'thecinemasource.storage_backends.MediaStorage'
 MEDIA_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, AWS_MEDIA_LOCATION)
 
 MEMCACHED_HOST = '0.0.0.0' #localhost
-
 MEMCACHED_PORT = 11211
+
+MONGO_PORT = 27017
+MONGO_HOST = '0.0.0.0' #localhost
+MONGO_NAME = 'project'
 
 from .local import *

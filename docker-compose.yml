@@ -14,8 +14,8 @@ services:
   adminer:
     image: adminer
 #    restart: always
-    ports:
-      - 8081:8080
+#    ports:
+#      - 8081:8080
   backend:
     image: project:latest
     container_name: project_backend
@@ -51,12 +51,31 @@ services:
   queue:
     container_name: rabbitmq
     image: rabbitmq:3-management
-    ports:
+#    ports:
 #      - 5672:5672
-      - 8080:15672
+#      - 8080:15672
 #NOTE:FIXME check is memcache size can handle large images
   cache:
     container_name: memcached
     image: memcached
     ports:
       - 11211:11211
+
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - 27017:27017
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
