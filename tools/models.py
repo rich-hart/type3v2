@@ -1,6 +1,8 @@
 import os
 from enum import Enum
 import uuid
+import pandas as pd
+import numpy as np
 from django.conf import  settings
 from django.db import models
 from project.storage_backends import StaticStorage, MediaStorage
@@ -44,22 +46,14 @@ class TfIDF(Tool):
         pickle.dump( tool, stream )
         stream.flush()
         stream.seek(0)
-#        self._vectorizer = SimpleUploadedFile(
-#            self.address.hash + ".pickle",
-#            stream.read(),
-#            content_type="application/octet-stream"
-#        )
         key = os.path.join(self.class_name, self.address.hex)
         self.s3_client.upload_fileobj(stream, settings.AWS_STORAGE_BUCKET_NAME, key)        
         self.save()
-        #Memory.objects.get(id=self.tag.hex)
-        #return cls(name=name, email=email)
-#    def create(self, *args, **kwargs):
-#        self.hash = uuid.uuid4().hex #NOTE: is hash already used?
-#        data = Memory.encode(self.name)
-#        memory = Memory.objects.create(id=self.hash,data=data).hash
-#        super(self, TfIDF).create(memory_id=self.hash, *args, **kwargs)
-        
+        array = vectors.toarray()
+        frame = pd.DataFrame(array)
+        frame.to_json(stream)
+        self.collection.insert_many(frame.rename(columns=dict(enumerate(labels))).to_dict('records'))
+        #self.collection.insert(???)
 
     # NOTE: Need to move to Base Object class
     class Namespace(Enum):
