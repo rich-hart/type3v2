@@ -27,13 +27,12 @@ class TfIDF(Tool):
     _labels = None
     _memory = None
 
-    address = models.OneToOneField(
-        Memory,
-        #on_delete=models.CASCADE,
-        on_delete=models.DO_NOTHING,
-#        related_name='+',
-        #related_name='supervisor_of',
+    address = models.UUIDField(
+        unique = True,
+        default = uuid.uuid4,
+        editable = False,
     )
+
 
     def create(self, *args, **kwargs):
         self.hash = uuid.uuid4().hex #NOTE: is hash already used?
@@ -87,6 +86,9 @@ class TfIDF(Tool):
     @property
     def labels(self):
         raise NotImplementedError()
+
+#    def create(self,*args, **kwargs):
+#        super(self, TfIDF).create(address_id=uuid.uuid4().hex,*args, **kwargs)
 
     def store(self, data):
         if isinstance(data, csr_matrix):
