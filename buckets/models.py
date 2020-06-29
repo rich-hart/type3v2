@@ -31,12 +31,16 @@ import PIL
 
 class FSObject(Object):
     MONGO_URI = f'mongodb://{settings.MONGO_USERNAME}:{settings.MONGO_PASSWORD}@{settings.MONGO_HOST}:{settings.MONGO_PORT}'
-    parent = models.ForeignKey('buckets.FSObject', on_delete=models.CASCADE, null=True, related_name='+')
     _s3_client = None
     _cache_client = None
     _mongo_client = None
     _mongo_db = None
     _collection = None
+
+
+
+
+    parent = models.ForeignKey('buckets.FSObject', on_delete=models.CASCADE, null=True, related_name='+')
     @property
     def key(self):
         return self.name

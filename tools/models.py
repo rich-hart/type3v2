@@ -14,11 +14,13 @@ class Tool(FSObject):
 
 class NLP(Tool):
     pass
+from scipy.sparse import csr_matrix
 
 class TfIDF(Tool):
     _vectorizer = models.FileField(storage=StaticStorage())
+    _vectors = None
     _labels = None
-
+    
     NAMESPACE_ROOT = 'TFIDF_' #FIXME: TODO: Not implemented  
 
     class Namespace(Enum):
@@ -36,6 +38,22 @@ class TfIDF(Tool):
     @property
     def corpus(self):
         raise NotImplementedError()
+
+    @property
+    def vectors(self):
+        raise NotImplementedError()
+
+    @property
+    def labels(self):
+        raise NotImplementedError()
+
+    def store(self, data):
+        if isinstance(data,csr_matrix):
+            raise NotImplementedError(f'save {data} to mongodb')
+        elif isinstance(data,list):
+            raise NotImplementedError(f'save {data} to general memory')
+        else:
+            raise NotImplementedError()
 #
 #class Vector(MONGODB):
 #    pass

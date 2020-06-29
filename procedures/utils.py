@@ -100,13 +100,13 @@ def tfidf(*tags):
         text_data = frame[frame.conf != -1]
         words = ' '.join(text_data.text.to_list())
         corpus.append(words)     
-    vectorizer = TfidfVectorizer(
+    tool = TfidfVectorizer(
             strip_accents='unicode',
             stop_words='english',
     )
-    vectors = vectorizer.fit_transform(corpus)
-    labels = vectorizer.get_feature_names()
-    tool = TfIDF.objects.create()
+    vectors = tool.fit_transform(corpus)
+    labels = tool.get_feature_names()
+    model = TfIDF.objects.create()
     #FIXME TODO save tool labels
     #db = tool.mongo_client[settings.MONGODB_NAME]
     # FIXME: TODO Need to save vectorizer pickle
@@ -120,8 +120,11 @@ def tfidf(*tags):
 #                "{settings.MONGO_HOST}/{MONGO_DATABASE}")
 #    db = client['test-database']
 #    collection = db['test-collection']
-    collection = tool.mongo_client[tool.class_name]
-    return vectors, labels
+#    collection = tool.mongo_client[tool.class_name]
+    model.store(labels)
+    model.store(vectors)
+    model.store(tool)
+    return [model.tag]
 
 
 # X of shape (n_samples, n_features)
