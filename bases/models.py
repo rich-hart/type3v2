@@ -36,6 +36,9 @@ class Choice(Enum): #NOTE: Link with Object class choice
 #FIXME: TODO Refactor Label --> Map / MemoryCell for extra tagging data 
 # TODO: Choose Encoding
 # TODO: need clean up function for Label / Map / MemoryCell / hash namepaces 
+
+
+
 class Label(models.Model): #FIXME: TODO --> make this general `abstract` Data class. 
     #FIXME: Label Depecated Switch with memory
     id = models.UUIDField(
@@ -46,7 +49,7 @@ class Label(models.Model): #FIXME: TODO --> make this general `abstract` Data cl
     #FIXME: TODO # MAKE _data 
     #FIXME: TODO HEX BINARY for better querying
     data = models.CharField(max_length=32)
-
+    _data = models.CharField(max_length=32)
     #FIXME: TODO 
     # def __str__ --> self.data
     # def name --> def __str__           
@@ -78,8 +81,93 @@ class Label(models.Model): #FIXME: TODO --> make this general `abstract` Data cl
         return str(self.data)
 
 # LONG TERM GENERAL MEMORY FOR PROJECT OBJECTS
+class Space(Enum):
+#    ROOT = 'PROJECT_' #FIXME cant get superclass of root to work
+    ROOT = ''
+
+    @property
+    def hash(self):
+        value = self.ROOT + self.value
+        return uuid.uuid3(uuid.NAMESPACE_DNS, value).hex
+#    def __init__(self, value):
+#        import ipdb; ipdb.set_trace()
+        #super(self, Space).__init__(value) #FIXME: Wont work???
+#        self = Enum(value)
+#        value = self.ROOT + namespace.value
+#        setattr(namespace, namespace.name, value)
+#        uuid = uuid.uuid3(uuid.NAMESPACE_DNS, value)
+#        setattr(namespace, 'uuid', uuid.hex)
+        #super(cls, TestUtils).setUpClass(*args,**kwargs)
+#        for _, namespace in enumerate(self):
+#            value = self.ROOT + namespace.value
+#            setattr(namespace, namespace.name, value)
+#            uuid = uuid.uuid3(uuid.NAMESPACE_DNS, value)
+#            setattr(namespace, 'uuid', uuid.hex)
+
 class Memory(Label): #FIXME: Make this concreat memory base class
-    pass
+#    _cache = None
+    _cache_client = None
+
+    @property
+    def cache_client(self):
+        if not self._cache_client:
+            self._cache_client = Client((settings.MEMCACHED_HOST, settings.MEMCACHED_PORT))
+        return self._cache_client
+
+#    class Namespace(Space):
+#        pass
+    #NOTE, check class decorators
+
+    def memory_id(self, space):
+        return uuid.uuid3(space.hash,self.id)
+
+    def retrieve(self, space):
+        hash = self.memory_id(space)
+        data = self.cache_client.get(id = hash)
+        if not data:
+            data = Memory.objects.get(id=hash).data
+        return data
+       
+    def store(self, space, data):
+        hash = self.memory_id(space)
+        self.cache_client.set(id=hash, data=data)
+        Memory.objects.update_or_create(id=hash, data=data)
+ 
+
+
+    @property
+    def data(self):
+        data = {}
+        for _, space in self.namespaces:
+                value = self.retrieve(space.hash)
+                value = self.decode(value)
+                name = space.value.lower()
+                data[name] = value
+        return data
+
+
+
+#    def save(self):
+#        super(self, Space).__init__(value)
+
+#    def store(self, name, data):
+#        raise Warning('store in  memcache first')
+#        space = self.Namespace(name)
+#        Memory.obects.update_or_create(tag = space.hash, data = self.encode(data))
+
+
+#                setattr(self, namespace.name, namespace.value)
+
+#        def get(self):
+#            namespace = uuid.uuid3(uuid.NAMESPACE_DNS,
+#        @classmethod
+#        def get(cls):
+#            namespace = uuid.uuid3(uuid.NAMESPACE_DNS, name)
+#            return namespace
+
+
+
+        
 
 #register(Label)
 #TODO: move to utils

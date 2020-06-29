@@ -30,7 +30,7 @@ import PIL
 
 
 class FSObject(Object):
-    MONGO_URI = f'mongodb://{settings.MONGO_USERNAME}:{settings.MONGO_PASSWORD}@{settings.MONGO_HOST}:{settings.MONGO_PORT}'
+    MONGO_URI = f'mongodb://{settings.MONGO_USERNAME}:{settings.MONGO_PASSWORD}@{settings.MONGO_HOST}:{settings.MONGO_PORT}' #TODO: FIXME: Move to settings
     _s3_client = None
     _cache_client = None
     _mongo_client = None
