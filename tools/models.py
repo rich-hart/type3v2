@@ -27,6 +27,8 @@ from scipy.sparse import csr_matrix
 from django.core.files.uploadedfile import SimpleUploadedFile
 import pickle
 import io
+
+
 class TfIDF(Tool):
     _vectorizer = models.FileField(storage=MediaStorage())
     _vectors = None
@@ -46,7 +48,6 @@ class TfIDF(Tool):
 
     #@classmethod
     def store(self, tool, labels, vectors):
-        import ipdb; ipdb.set_trace()
         stream = io.BytesIO()
         pickle.dump( tool, stream )
         stream.flush()

@@ -158,4 +158,23 @@ class TestUtils(TestCase):
 #        with self.settings(MONGODB_NAME='test_'+gen_rand_str()):
         [tag] = tfidf(*tags)
 
-
+    def test_classifier(self):
+        import ipdb; ipdb.set_trace()
+        path = os.path.join(TEST_DATA_DIR,'test.tsv')
+        tags = []
+        text = Text.objects.create(name=TEST_FILE_NAME,format='tsv')
+        tags.append(text.tag.hex)
+        with open(path,'rb') as fp:
+            text._raw = fp.read()
+            text.frame
+            text.cache()
+            for r_path in range(10):
+                r_text = Text.objects.create(name=TEST_FILE_NAME,format='tsv')
+                r_text._frame = text._frame.copy()
+                for i in range(len(r_text._frame['text'])):
+                    r_text._frame[i] = gen_rand_str()
+                r_text._raw = r_text._frame.to_csv(sep='\t')
+                r_text.cache()
+                tags.append(r_text.tag.hex)
+#        with self.settings(MONGODB_NAME='test_'+gen_rand_str()):
+        [tag] = tfidf(*tags)

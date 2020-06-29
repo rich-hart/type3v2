@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from bases.models import Label
 from tools.models import Tool
-
+import uuid
 #MONGO DB
 #class Vector(MONGODB):
 #     pass
@@ -19,6 +19,7 @@ from tools.models import Tool
 #  @property
 #  def name(self):
 #  return __str__
+import random
 
 class Classifier(Tool):
     LABEL_NAMESPACE = 'CLASSIFIER_LABELS'
@@ -26,9 +27,21 @@ class Classifier(Tool):
     SAMPLE_NAMESPACE = 'SAMPLE_SPACE'
     TEST_NAMESPACE = 'TEST_SPACE'
     TRAIN_NAMESPACE = 'TRAIN_SPACE'
-
-    seed = None
+    samples = models.UUIDField(
+        primary_key = False,
+        unique = True,
+        editable = False,
+    )
+    seed = models.UUIDField(
+        primary_key = False,
+        unique = True,
+        default = uuid.uuid4,
+        editable = False,
+    )
     _labels = None
+
+    def train(self, *args, **kwargs):
+        raise NotImplementedError
 
     @property
     def labels(self):
@@ -60,14 +73,18 @@ class Random(Classifier):
         return label
 
 class Human(Classifier):
-    user = models.OneToOneField(
-        User,
+    profile = models.OneToOneField(
+        'users.Profile',
         on_delete=models.CASCADE,
     )
 
     @property
     def seed(self):
-        return self.user.id
+        return self.profile.tag.hex
+
+class SVM(Classifier):
+    pass
+
 
 class ML(Classifier):
     #TODO: random seed 

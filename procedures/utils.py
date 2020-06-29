@@ -130,7 +130,8 @@ def tfidf(*tags):
 
 # X of shape (n_samples, n_features)
 # y of class labels (strings or integers), of shape (n_samples):
-def train(classifier,samples, labels):
+def train(classifier, records):
+    import ipdb; ipdb.set_trace()
     train_samples, test_samples, train_labels, test_labels = train_test_split(
         samples,
         labels,
