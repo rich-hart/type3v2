@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import pickle
 import boto3
+from pymongo import MongoClient
+
 from pymemcache.client.base import Client
 from django.conf import settings
 from django.db import models
@@ -28,11 +30,13 @@ import PIL
 
 
 class FSObject(Object):
+    MONGO_URI = f'mongodb://{settings.MONGO_USERNAME}:{settings.MONGO_PASSWORD}@{settings.MONGO_HOST}:{settings.MONGO_PORT}'
     parent = models.ForeignKey('buckets.FSObject', on_delete=models.CASCADE, null=True, related_name='+')
     _s3_client = None
     _cache_client = None
     _mongo_client = None
-
+    _mongo_db = None
+    _collection = None
     @property
     def key(self):
         return self.name
@@ -53,11 +57,32 @@ class FSObject(Object):
     def root(self):
         return self._root(self)
 
+    @property
+    def mongo_db(self):
+        if not self._mongo_db:
+            self._mongo_db = self.mongo_client[settings.MONGO_DATABASE]
+        return self._mongo_db
+
+    @property
+    def collection(self):
+        if not self._collection:
+            self._collection=self.mongo_db[self.class_name]
+        return self._collection
 
     @property
     def mongo_client(self):
         if not self._mongo_client:
-            self._mongo_client = MongoClient(settings.MONGODB_HOST,settings.MONGODB_PORT)
+#            self._mongo_client = MongoClient(
+#                settings.MONGO_HOST,
+#                settings.MONGO_PORT,
+#                username=settings.MONGO_USERNAME,
+#                password=settings.MONGO_PASSWORD,
+#                authSource="admin",
+#            )
+#            self._mongo_client = MongoClient(f"mongodb://{settings.MONGO_USERNAME}:"\
+#                "{settings.MONGO_PASSWORD}@"\
+#                "{settings.MONGO_HOST}/{MONGO_DATABASE}")
+            self._mongo_client = MongoClient(self.MONGO_URI)
         return self._mongo_client
 
     @property

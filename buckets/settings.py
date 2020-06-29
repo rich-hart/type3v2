@@ -1,0 +1,7 @@
+MEMCACHED_HOST = '0.0.0.0' #localhost
+MEMCACHED_PORT = 11211
+
+MONGO_PORT = 27017
+MONGO_HOST = '0.0.0.0' #localhost
+MONGO_NAME = 'project'
+

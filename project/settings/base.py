@@ -33,6 +33,7 @@ MEMCACHED_PORT = 11211
 
 MONGO_PORT = 27017
 MONGO_HOST = '0.0.0.0' #localhost
-MONGO_NAME = 'project'
-
+MONGO_DATABASE = os.environ.get('MONGO_INITDB_DATABASE','test-project')
+MONGO_USERNAME = os.environ.get('MONGO_INITDB_ROOT_USERNAME','guest')
+MONGO_PASSWORD = os.environ.get('MONGO_INITDB_ROOT_PASSWORD','guest')
 from .local import *

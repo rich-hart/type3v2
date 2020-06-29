@@ -54,22 +54,24 @@ def mock_retrieve(index, *tags):
 # NOTE This will allow for proper syntax unit testing, without needing live workers
 import csv
 
+TEST_MONGODB_NAME='test_'+gen_rand_str()
 
-@override_settings(MONGODB_NAME='test_'+gen_rand_str()) 
+@override_settings(MONGODB_NAME='test_project') 
 class TestUtils(TestCase):
 
-    @classmethod
-    def setUpClass(cls,*args,**kwargs):
-        super(cls, TestUtils).setUpClass(*args,**kwargs)
-        m_client = FSObject().mongo_client
-        self.mongodb = m_client[self.settings.MONGODB_NAME]
+#    @classmethod
+#    def setUpClass(cls,*args,**kwargs):
+#        import ipdb; ipdb.set_trace()
+#        super(cls, TestUtils).setUpClass(*args,**kwargs)
+#        m_client = FSObject().mongo_client
+#        cls.mongodb = m_client[TEST_MONGODB_NAME]
 
-    @classmethod
-    def setUpClass(cls,*args,**kwargs):
-        super(cls, TestUtils).setUpClass(*args,**kwargs)
-        m_client = FSObject().mongo_client
-        self.mongodb = m_client[self.settings.MONGODB_NAME]
-        mongo_client.drop_database(self.settings.MONGODB_NAME)
+#    @classmethod
+#    def tearDownClass(cls,*args,**kwargs):
+#        super(cls, TestUtils).tearDownClass(*args,**kwargs)
+#        m_client = FSObject().mongo_client
+#        mongodb = m_client[TEST_MONGODB_NAME]
+#        m_client.drop_database(TEST_MONGODB_NAME)
 
     @mock.patch('procedures.utils.retrieve', side_effect=mock_retrieve)
     def target(self, task_name, index, objects, *args):
@@ -153,6 +155,6 @@ class TestUtils(TestCase):
                 r_text._raw = r_text._frame.to_csv(sep='\t')
                 r_text.cache()
                 tags.append(r_text.tag.hex)
-        with self.settings(MONGODB_NAME='test_'+gen_rand_str()):
-            vectors, labels = tfidf(*tags)
+#        with self.settings(MONGODB_NAME='test_'+gen_rand_str()):
+        vectors, labels = tfidf(*tags)
 

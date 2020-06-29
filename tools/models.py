@@ -1,5 +1,4 @@
 from enum import Enum
-from pymongo import MongoClient
 from django.db import models
 from project.storage_backends import StaticStorage
 

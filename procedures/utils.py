@@ -1,6 +1,7 @@
 import os
 from typing import List
 import pymongo
+from pymongo import MongoClient
 import pytesseract
 import pandas
 from bases.models import Object
@@ -107,11 +108,19 @@ def tfidf(*tags):
     labels = vectorizer.get_feature_names()
     tool = TfIDF.objects.create()
     #FIXME TODO save tool labels
-    db = tool.mongo_client[settings.MONGODB_NAME]
+    #db = tool.mongo_client[settings.MONGODB_NAME]
     # FIXME: TODO Need to save vectorizer pickle
     #  X_train_vectors = vectorizer.fit_transform(X_train_corpus)
     #  X_test_vectors = vectorizer.transform(X_test_corpus)
-    
+    #collection = db[tool.class_name]
+    #collection.insert_one({})
+#    collection.insert_one(vectors)
+#    client = MongoClient(f"mongodb://{settings.MONGO_USERNAME}:"\ 
+#                "{settings.MONGO_PASSWORD}@"\ 
+#                "{settings.MONGO_HOST}/{MONGO_DATABASE}")
+#    db = client['test-database']
+#    collection = db['test-collection']
+    collection = tool.mongo_client[tool.class_name]
     return vectors, labels
 
 
