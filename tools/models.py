@@ -1,4 +1,5 @@
 from enum import Enum
+import uuid
 from django.db import models
 from project.storage_backends import StaticStorage
 from bases.models import Memory
@@ -17,6 +18,8 @@ class NLP(Tool):
 from scipy.sparse import csr_matrix
 
 
+#class Label(Memory):
+#    pass
 
 class TfIDF(Tool):
     _vectorizer = models.FileField(storage=StaticStorage())
@@ -24,13 +27,20 @@ class TfIDF(Tool):
     _labels = None
     _memory = None
 
-    memory = models.OneToOneField(
-        'bases.Memory',
+    address = models.OneToOneField(
+        Memory,
         #on_delete=models.CASCADE,
         on_delete=models.DO_NOTHING,
-        related_name='+',
+#        related_name='+',
         #related_name='supervisor_of',
     )
+
+    def create(self, *args, **kwargs):
+        self.hash = uuid.uuid4().hex #NOTE: is hash already used?
+#        data = Memory.encode(self.name)
+#        memory = Memory.objects.create(id=self.hash,data=data).hash
+        super(self, TfIDF).create(memory_id=self.hash, *args, **kwargs)
+        
 
     # NOTE: Need to move to Base Object class
     class Namespace(Enum):
