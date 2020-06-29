@@ -1,6 +1,7 @@
 from enum import Enum
 import io
 import numpy as np
+import pandas as pd
 import pickle
 import boto3
 from pymemcache.client.base import Client
@@ -159,10 +160,33 @@ class Text(File): #TEXT
         @classmethod
         def get_default(cls):
             return cls.undefined.tsv.value
-
+    _frame = None
     # image = 1-1 Image
     def cache(self):
         self.cache_client.set(self.tag.hex, self._raw)
+
+    @property
+    def frame(self):
+        if not self._frame and self.format==self.Format.tsv.value:
+            self._frame = self.get_frame()
+        return self._frame
+
+    def get_frame(self):
+        return pd.read_csv(io.StringIO(self._raw.decode()),sep='\t',dtype={'text':str})
+
+    def load(self):
+        data = self.cache_client.get(self.tag.hex)
+        if not data: 
+            fileobj = self.s3_client.get_object(
+                Bucket=self.root.name,
+                Key=self.name,
+            )
+            data = fileobj['Body'].read()
+        self._raw = data
+         
+
+            #self._array = None
+     
 
 #import boto3
 # 

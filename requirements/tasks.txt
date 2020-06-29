@@ -3,3 +3,5 @@ pdf2image
 celery
 pymemcache
 pytesseract
+sklearn
+pandas

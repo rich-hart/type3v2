@@ -1,7 +1,7 @@
 import os
 from typing import List
 import pytesseract
-
+import pandas
 from bases.models import Object
 from buckets.models import *
 from .apps import worker_queue
@@ -72,19 +72,53 @@ def convert_to_images(index, *files):
         image = Image.objects.create(name = name, parent=files[index],format='png')
         images[index]
         image._pil = images[index]
-        image.cache()
+        image.cache() # FIXME: TODO Save in new task
         tags.append(image.tag.hex)
     return tags
 
 def ocr(index, *images):
-    import ipdb; ipdb.set_trace()
     texts = [None] * len(images)
     images[index].load()
     name = get_prefix(images[index].name) + '.tsv'
     text = Text.objects.create(name = name, parent = images[index] )
     text._raw = pytesseract.image_to_data(images[index].pil)  
-    text.cache()
+    text.cache() # FIXME: TODO Save in new task
     return [text.tag.hex]
+
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+def tfidf(*tags):
+    texts = [Text.objects.get(tag=t) for t in tags ]
+    corpus = []
+    for text in texts:
+        text.load()
+        frame = text.frame
+        text_data = frame[frame.conf != -1]
+        words = ' '.join(text_data.text.to_list())
+        corpus.append(words)     
+    vectorizer = TfidfVectorizer()
+    vectorizer = TfidfVectorizer()
+    vectors = vectorizer.fit_transform(corpus)
+    labels = vectorizer.get_feature_names()
+    return vectors, labels
+
+
+# X of shape (n_samples, n_features)
+# y of class labels (strings or integers), of shape (n_samples):
+def train(classifier,samples, labels):
+    train_samples, test_samples, train_labels, test_labels = train_test_split(
+        samples,
+        labels,
+        test_size=classifier.seed,
+        random_state=classifier
+    )
+    classifier._clf = svm.SVC()
+    classifier._clf.fit(train_samples, train_labels)
+  
+    predicted_labels = classifier._clf.predict(test_samples)
+    classifier._accuracy = sum([ expected == returned for expected, returned in zip(test_labels, predicted_labels)])
+    classifier.save() 
+    return classifier.tag
 
 
 def save_image(index, *images):
@@ -115,10 +149,10 @@ def save(index, *images):
 #    raise NotImplementedError
 #    return texts
 
-@worker_queue.task
-def tfidf(index, *texts):
-    raise NotImplementedError
-    return vectors
+#@worker_queue.task
+#def tfidf(index, *texts):
+#    raise NotImplementedError
+#    return vectors
 
 @worker_queue.task
 def train_svm(index, *vectors):

@@ -1,4 +1,5 @@
 import random
+import string
 from celery import signature
 from unittest import mock
 
@@ -21,6 +22,10 @@ TEST_FILE_NAME = 'test.pdf'
 TEST_DATA_DIR = os.path.join(os.getcwd(),'data','tests')
 random.seed(SEED)
 
+def gen_rand_str():
+    # printing lowercase
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(10)) 
 
 #import os
 #import mock
@@ -44,7 +49,10 @@ def mock_retrieve(index, *tags):
 # FIXME: TODO Use a LOT of mocking in tests.  I mean A LOT.
 # NEED TO EXPLICETLY DECLAIR AND TEST Worker object iteration, / iterable.  
 # FIXME: TODO Model celery tests off of groups, chains, chords doc,
-# NOTE This will allow for proper syntax unit testing, without needing live workers 
+# NOTE This will allow for proper syntax unit testing, without needing live workers
+import csv
+
+ 
 class TestUtils(TestCase):
     @mock.patch('procedures.utils.retrieve', side_effect=mock_retrieve)
     def target(self, task_name, index, objects, *args):
@@ -107,4 +115,25 @@ class TestUtils(TestCase):
         cache = FSObject().cache_client
         data = cache.get(tags[0])
         self.assertIsNotNone(data)
-        self.assertIsNotNone(data)
+    def cleanUpPaths(self):
+        for path in self.test_paths:
+            os.remove(path)
+    def test_tfidf(self):
+        path = os.path.join(TEST_DATA_DIR,'test.tsv')
+        tags = []
+        text = Text.objects.create(name=TEST_FILE_NAME,format='tsv')
+        tags.append(text.tag.hex)
+        with open(path,'rb') as fp:
+            text._raw = fp.read()
+            text.frame
+            text.cache()
+            for r_path in range(10):
+                r_text = Text.objects.create(name=TEST_FILE_NAME,format='tsv')
+                r_text._frame = text._frame.copy()
+                for i in range(len(r_text._frame['text'])):
+                    r_text._frame[i] = gen_rand_str()
+                r_text._raw = r_text._frame.to_csv(sep='\t')
+                r_text.cache()
+                tags.append(r_text.tag.hex)
+        vectors, labels = tfidf(*tags)
+
