@@ -96,10 +96,15 @@ def tfidf(*tags):
         text_data = frame[frame.conf != -1]
         words = ' '.join(text_data.text.to_list())
         corpus.append(words)     
-    vectorizer = TfidfVectorizer()
-    vectorizer = TfidfVectorizer()
+    vectorizer = TfidfVectorizer(
+            strip_accents='unicode',
+            stop_words='english',
+    )
     vectors = vectorizer.fit_transform(corpus)
     labels = vectorizer.get_feature_names()
+    # FIXME: TODO Need to save vectorizer pickle
+    #  X_train_vectors = vectorizer.fit_transform(X_train_corpus)
+    #  X_test_vectors = vectorizer.transform(X_test_corpus)
     return vectors, labels
 
 

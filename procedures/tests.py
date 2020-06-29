@@ -119,6 +119,7 @@ class TestUtils(TestCase):
         for path in self.test_paths:
             os.remove(path)
     def test_tfidf(self):
+        import ipdb; ipdb.set_trace()
         path = os.path.join(TEST_DATA_DIR,'test.tsv')
         tags = []
         text = Text.objects.create(name=TEST_FILE_NAME,format='tsv')
