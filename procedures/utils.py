@@ -91,7 +91,6 @@ def ocr(index, *images):
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 def tfidf(*tags):
-    import ipdb; ipdb.set_trace()
     texts = [Text.objects.get(tag=t) for t in tags ]
     corpus = []
     for text in texts:

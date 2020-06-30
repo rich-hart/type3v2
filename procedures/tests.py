@@ -1,5 +1,7 @@
 import random
 import string
+
+import json
 from celery import signature
 from unittest import mock
 from django.test import TestCase, override_settings
@@ -138,7 +140,6 @@ class TestUtils(TestCase):
         for path in self.test_paths:
             os.remove(path)
     def test_tfidf(self):
-        import ipdb; ipdb.set_trace()
         path = os.path.join(TEST_DATA_DIR,'test.tsv')
         tags = []
         text = Text.objects.create(name=TEST_FILE_NAME,format='tsv')
@@ -158,23 +159,34 @@ class TestUtils(TestCase):
 #        with self.settings(MONGODB_NAME='test_'+gen_rand_str()):
         [tag] = tfidf(*tags)
 
+        returned = len([ d  for d in TfIDF.objects.get(tag=tag).vectors.find()])
+        expected = 0
+        self.assertGreater(returned,expected)
+    
     def test_classifier(self):
-        import ipdb; ipdb.set_trace()
-        path = os.path.join(TEST_DATA_DIR,'test.tsv')
-        tags = []
-        text = Text.objects.create(name=TEST_FILE_NAME,format='tsv')
-        tags.append(text.tag.hex)
-        with open(path,'rb') as fp:
-            text._raw = fp.read()
-            text.frame
-            text.cache()
-            for r_path in range(10):
-                r_text = Text.objects.create(name=TEST_FILE_NAME,format='tsv')
-                r_text._frame = text._frame.copy()
-                for i in range(len(r_text._frame['text'])):
-                    r_text._frame[i] = gen_rand_str()
-                r_text._raw = r_text._frame.to_csv(sep='\t')
-                r_text.cache()
-                tags.append(r_text.tag.hex)
+        path = os.path.join(TEST_DATA_DIR,'vectors.json')
+        features = TfIDF.objects.create()
+        with open(path,'r') as fp:
+            vectors = json.load(fp)
+        [ v.pop('_id') for v in vectors] 
+        features.vectors.insert_many(vectors)
+
+        #tags = []
+        #text = Text.objects.create(name=TEST_FILE_NAME,format='tsv')
+        #tags.append(text.tag.hex)
+#        with open(path,'rb') as fp:
+#            text._raw = fp.read()
+#            text.frame
+#            text.cache()
+#            for r_path in range(10):
+#                r_text = Text.objects.create(name=TEST_FILE_NAME,format='tsv')
+#                r_text._frame = text._frame.copy()
+#                for i in range(len(r_text._frame['text'])):
+#                    r_text._frame[i] = gen_rand_str()
+#                r_text._raw = r_text._frame.to_csv(sep='\t')
+#                r_text.cache()
+#                tags.append(r_text.tag.hex)
 #        with self.settings(MONGODB_NAME='test_'+gen_rand_str()):
-        [tag] = tfidf(*tags)
+#        [tag] = tfidf(*tags)
+#        returned = [ d  for d in TfIDF.objects.get(address=tag)[0].vectors.find()]
+
