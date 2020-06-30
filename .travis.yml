@@ -1,0 +1,26 @@
+# require the branch name to be master (note for PRs this is the base branch name)
+
+
+  
+language: python
+python:
+  - '3.7.7'
+addons:
+  postgresql: '9.4'
+before_install:
+  - pip install coverage
+  - pip install coveralls
+install:
+  - pip install -r requirements/dev.txt
+before_script:
+  - createdb -U postgres project
+  - createuser -U postgres --superuser root
+script:
+  - coverage run manage.py test --verbosity=2 --liveserver=127.0.0.1:8001
+after_success:
+  - coveralls
+notifications:
+  email: false
+sudo: false
+env:
+  - DJANGO_SETTINGS_MODULE=project.settings.dev
