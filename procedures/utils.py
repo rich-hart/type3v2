@@ -129,21 +129,6 @@ def tfidf(*tags):
 
 # X of shape (n_samples, n_features)
 # y of class labels (strings or integers), of shape (n_samples):
-def train(classifier, records):
-    import ipdb; ipdb.set_trace()
-    train_samples, test_samples, train_labels, test_labels = train_test_split(
-        samples,
-        labels,
-        test_size=classifier.seed,
-        random_state=classifier
-    )
-    classifier._clf = svm.SVC()
-    classifier._clf.fit(train_samples, train_labels)
-  
-    predicted_labels = classifier._clf.predict(test_samples)
-    classifier._accuracy = sum([ expected == returned for expected, returned in zip(test_labels, predicted_labels)])
-    classifier.save() 
-    return classifier.tag
 
 
 def save_image(index, *images):
