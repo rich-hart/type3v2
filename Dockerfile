@@ -8,7 +8,7 @@ run apt-get install -y  \
 
 workdir /app
 
-copy requirements.txt requirements.txt
+copy requirements requirements
 
 run pip3 install -r requirements/dev.txt
 
