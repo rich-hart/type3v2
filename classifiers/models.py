@@ -32,12 +32,12 @@ class Classifier(Tool):
         unique = True,
         editable = False,
     )
-    seed = models.UUIDField(
-        primary_key = False,
-        unique = True,
-        default = uuid.uuid4,
-        editable = False,
-    )
+#    seed = models.UUIDField(
+#        primary_key = False,
+#        unique = True,
+#        default = uuid.uuid4,
+#        editable = False,
+#    )
 #    _labels = None
 
 #    def train(self, *args, **kwargs):

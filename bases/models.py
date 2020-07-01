@@ -219,7 +219,7 @@ class Base(models.Model):
     # namespaces = set()    
     @property
     def seed(self):
-        return self.tag
+        return self.tag.hex
 
     #FIXME: TODO: Clean up namespaces
 

@@ -55,6 +55,7 @@ class ClassificationView(TestCase):
 class ClassificationUtils(TestCase):
 
     def test_classifier(self):
+        import ipdb; ipdb.set_trace()
         path = os.path.join(TEST_DATA_DIR,'vectors.json')
         features = TfIDF.objects.create()
         with open(path,'r') as fp:
