@@ -1,6 +1,6 @@
 import random
 import string
-
+from time import sleep
 import json
 from celery import signature
 from unittest import mock
@@ -134,6 +134,7 @@ class TestUtils(TestCase):
         image.cache()
         tags = ocr(0,*[image])
         self.assertTrue(len(tags))
+        sleep(.3)
         cache = FSObject().cache_client
         data = cache.get(tags[0])
         self.assertIsNotNone(data)
