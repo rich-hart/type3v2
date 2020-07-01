@@ -10,8 +10,8 @@ before_install:
   -in private.py.enc -out project/settings/private.py -d
 #- pip install coverage
 #- pip install coveralls
-install:
-- pip install -r requirements/dev.txt
+#install:
+#- pip install -r requirements/dev.txt
 before_script:
 - docker-compose up
 #- createdb -U postgres project
