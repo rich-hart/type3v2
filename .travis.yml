@@ -2,21 +2,24 @@ language: python
 python:
 - 3.7.7
 addons:
-  postgresql: '9.4'
+  apt:
+    packages:
+      - docker-ce
 before_install:
 - openssl aes-256-cbc -K $encrypted_beb0f46490a6_key -iv $encrypted_beb0f46490a6_iv
   -in private.py.enc -out project/settings/private.py -d
-- pip install coverage
-- pip install coveralls
+#- pip install coverage
+#- pip install coveralls
 install:
 - pip install -r requirements/dev.txt
 before_script:
-- createdb -U postgres project
-- createuser -U postgres --superuser root
+- docker-compose up
+#- createdb -U postgres project
+#- createuser -U postgres --superuser root
 script:
-- coverage run manage.py test --verbosity=2 
+- docker-compose exec -it backend coverage run manage.py test --verbosity=2 
 after_success:
-- coveralls
+- docker-compose exec -it backend coveralls
 notifications:
   email: false
 sudo: false

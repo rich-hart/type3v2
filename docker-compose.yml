@@ -24,9 +24,9 @@ services:
       - 8000:8000
     environment:
       - SQL_HOST=db
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - DJANGO_JWT_REDIRECT=next
+#      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+#      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+#      - DJANGO_JWT_REDIRECT=next
       - CELERY_BROKER_URL=amqp://guest:guest@queue:5672//
       - CELERY_RESULT_BACKEND=amqp://guest:guest@queue:5672//
     depends_on:
@@ -37,17 +37,20 @@ services:
   worker:
     image: project:latest
     container_name: project_worker
-    command: celery -A capco worker --loglevel=info
+    command: celery -A project worker --loglevel=info
     environment:
       - SQL_HOST=db
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - CELERY_BROKER_URL=amqp://guest:guest@queue:5672//
       - CELERY_RESULT_BACKEND=amqp://guest:guest@queue:5672//
-      - DJANGO_SETTINGS_MODULE=capco.settings
+      - DJANGO_SETTINGS_MODULE=project.settings.dev
     depends_on:
       - db
       - backend
+      - queue
+      - cache
+      - mongo
   queue:
     container_name: rabbitmq
     image: rabbitmq:3-management
