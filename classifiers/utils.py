@@ -7,7 +7,6 @@ from sklearn import svm
 
 
 def train(classifier):
-    import ipdb; ipdb.set_trace()
     train_samples, test_samples, train_labels, test_labels = train_test_split(
         samples,
         labels,

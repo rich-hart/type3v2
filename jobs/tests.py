@@ -95,7 +95,6 @@ class TestJob(TestCase):
 
     @unittest.skip("Patch test view broken, dev works") 
     def test_start_job(self):
-        import ipdb; ipdb.set_trace()
         factory = APIRequestFactory()
         view = JobViewSet.as_view({'get':'start'})
 

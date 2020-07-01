@@ -63,7 +63,6 @@ class TestUtils(TestCase):
 
 #    @classmethod
 #    def setUpClass(cls,*args,**kwargs):
-#        import ipdb; ipdb.set_trace()
 #        super(cls, TestUtils).setUpClass(*args,**kwargs)
 #        m_client = FSObject().mongo_client
 #        cls.mongodb = m_client[TEST_MONGODB_NAME]
@@ -100,15 +99,17 @@ class TestUtils(TestCase):
     def test_task_walk(self):
         bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
         file = File.objects.create(parent=bucket,name=TEST_FILE_NAME)
-        expected = [
+        expected = set([
                     'folder_0/',
                     'folder_0/folder_1/',
                     'folder_0/folder_1/sample.pdf',
                     'folder_0/folder_2/',
                     'test.pdf',
-        ]
-        returned = self.target('list_objects',0, [bucket.tag])
-        self.assertListEqual(expected, returned)
+                    'media/', 
+                    'static/',
+        ])
+        returned = set(self.target('list_objects',0, [bucket.tag]))
+        self.assertSetEqual(expected, returned)
 
     def test_mirror_pdfs(self):
         bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)

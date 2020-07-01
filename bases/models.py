@@ -99,7 +99,6 @@ class Space(Enum):
         value = self.value + ROOT_NAMESPACE
         return uuid.uuid3(uuid.NAMESPACE_DNS, value).hex
 #    def __init__(self, value):
-#        import ipdb; ipdb.set_trace()
         #super(self, Space).__init__(value) #FIXME: Wont work???
 #        self = Enum(value)
 #        value = self.ROOT + namespace.value

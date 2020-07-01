@@ -120,10 +120,8 @@ class TfIDF(Tool):
 #    def store(self, data):
 ##      Memory.objects.update_or_create(id=self.address.hex)
 #        if isinstance(data, csr_matrix):
-#            import ipdb; ipdb.set_trace()
 #            raise NotImplementedError(f'save {data} to mongodb')
 #        elif isinstance(data, list):
-#            import ipdb; ipdb.set_trace()
 #            #self.memory.data
 #            for i in range(len(data)):
 #                encoded_data = Memory.encode(data[i])
@@ -132,7 +130,6 @@ class TfIDF(Tool):
 #            #memory = Memory.objects.update_or_create(id=self.address)
 #            #raise NotImplementedError(f'save {data} to general memory')
 #        else:
-#            import ipdb; ipdb.set_trace()
 #            raise NotImplementedError()
 #
 #class Vector(MONGODB):

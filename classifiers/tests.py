@@ -32,7 +32,6 @@ class ClassificationView(TestCase):
 
     @unittest.skip("Patch test view broken, dev works")
     def test_start_job(self):
-        import ipdb; ipdb.set_trace()
         factory = APIRequestFactory()
         view = JobViewSet.as_view({'get':'start'})
 
@@ -56,7 +55,6 @@ class ClassificationView(TestCase):
 class ClassificationUtils(TestCase):
 
     def test_classifier(self):
-        import ipdb; ipdb.set_trace()
         path = os.path.join(TEST_DATA_DIR,'vectors.json')
         features = TfIDF.objects.create()
         with open(path,'r') as fp:

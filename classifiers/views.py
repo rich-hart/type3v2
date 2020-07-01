@@ -14,7 +14,6 @@ from .serializers import *
 #    serializer_class = BinaryClassifierSerializer
 #    # FIXME: TODO filter query for human classifier
 #    def perform_update(self, serializer):
-#        import ipdb; ipdb.set_trace()
 #        #serializer.save(owner=self.request.user.profile,status=Job.Status.CREATED.value)
 #        pass 
 #
