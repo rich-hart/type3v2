@@ -15,8 +15,8 @@ install:
 before_script:
   - createdb -U postgres project
   - createuser -U postgres --superuser root
-  - echo $ANSIBLE_VAULT_PASSWORD >> ansible_vault_password.txt
-  - ansible-vault decrypt --vault-password-file ansible_vault_password.txt project/settings/private.yml
+#  - echo $ANSIBLE_VAULT_PASSWORD >> ansible_vault_password.txt
+#  - ansible-vault decrypt --vault-password-file ansible_vault_password.txt project/settings/private.yml
 script:
   - coverage run manage.py test --verbosity=2 --liveserver=127.0.0.1:8001
 after_success:
