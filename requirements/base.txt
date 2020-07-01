@@ -5,3 +5,4 @@ django_filter
 django-storages
 numpy
 pymongo
+ansible
