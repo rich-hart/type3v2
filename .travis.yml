@@ -1,28 +1,24 @@
-# require the branch name to be master (note for PRs this is the base branch name)
-
-
-  
 language: python
 python:
-  - '3.7.7'
+- 3.7.7
 addons:
   postgresql: '9.4'
 before_install:
-  - pip install coverage
-  - pip install coveralls
+- openssl aes-256-cbc -K $encrypted_beb0f46490a6_key -iv $encrypted_beb0f46490a6_iv
+  -in private.py.enc -out project/settings/private.py -d
+- pip install coverage
+- pip install coveralls
 install:
-  - pip install -r requirements/dev.txt
+- pip install -r requirements/dev.txt
 before_script:
-  - createdb -U postgres project
-  - createuser -U postgres --superuser root
-#  - echo $ANSIBLE_VAULT_PASSWORD >> ansible_vault_password.txt
-#  - ansible-vault decrypt --vault-password-file ansible_vault_password.txt project/settings/private.yml
+- createdb -U postgres project
+- createuser -U postgres --superuser root
 script:
-  - coverage run manage.py test --verbosity=2 --liveserver=127.0.0.1:8001
+- coverage run manage.py test --verbosity=2 --liveserver=127.0.0.1:8001
 after_success:
-  - coveralls
+- coveralls
 notifications:
   email: false
 sudo: false
 env:
-  - DJANGO_SETTINGS_MODULE=project.settings.dev
+- DJANGO_SETTINGS_MODULE=project.settings.dev
