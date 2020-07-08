@@ -124,6 +124,7 @@ class TestUtils(TestCase):
         self.assertTrue(len(tags))
         image = Image.objects.get(tag=tags[0]) 
         data = image.cache_client.get(image.tag.hex) 
+        sleep(.3)
         self.assertIsNotNone(data)
 
     def test_ocr_images(self):
