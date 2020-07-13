@@ -12,9 +12,26 @@ from .models import *
 from .views import *
 #NOTE TEST INSTANCE
 class TestBinaryClassificationJob(TestCase):
-    @unittest.skip("NotImplemented")
     def test_job_owner_human(self):
-        self.fail("NotImplementedError")
+        import ipdb; ipdb.set_trace()
+#        factory = APIRequestFactory()
+#        view = ClassificationViewSet.as_view({'post':'list'})
+
+        self.test_user = User.objects.create(username='test')
+        Profile.objects.create(user=self.test_user)
+        job = Classification.objects.create(owner=self.test_user.profile)
+        job_url = reverse('classification-list')
+#        job_url = os.path.join(job_url,str(job.id),'start') + '/?format=json' 
+        data = {
+            'owner': self.test_user.profile.id,
+#            'status': Job.Status.CREATED.value
+        }
+        #FIXME: TODO
+#        request = factory.post(job_url, data=data,format='json')
+#        response = view(request)                   
+        self.client.force_login(self.test_user)
+        response = self.client.post(job_url, data,format='json', follow=True)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     @unittest.skip("NotImplemented")
     def test_job_owner_random_bot(self):

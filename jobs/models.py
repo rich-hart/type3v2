@@ -15,7 +15,7 @@ from users.models import Profile
 
 class Job(Base):
     description = None
-    owner = models.OneToOneField(
+    owner = models.ForeignKey(
         Profile,
         on_delete=models.CASCADE,
     )
@@ -45,6 +45,16 @@ class Job(Base):
     def error(self):
         raise NotImplementedError
 
+class Assignee(Base):
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE,
+    )
+    profile = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+    )
+
 class ProgressReport(Base):
     #foriegn key to job
     #NOTE: restrict update in view
@@ -61,6 +71,7 @@ class ProgressReport(Base):
 
 class Classification(Job):
     description = "classify the instances in an object set"
+#    classifier = models.OneToOneField('classifiers.Classifier', on_delete=models.CASCADE)
     #TODO: classifier = #foriegn key Classifier, try to use Model string name for import
 
     @property

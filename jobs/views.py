@@ -14,7 +14,9 @@ class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user.profile,status=Job.Status.CREATED.value)
+        #FIXME: create profile in user view when merged
+        serializer.save(owner=self.request.user.profile, status=Job.Status.CREATED.value)
+        
 
     @action(
         detail=True,
@@ -28,3 +30,35 @@ class JobViewSet(viewsets.ModelViewSet):
         data = {'status':job.status}
         return Response(data)    
 
+class ClassificationViewSet(JobViewSet):
+    queryset = Classification.objects.all()
+    serializer_class = ClassificationSerializer
+
+    def perform_create(self, serializer):
+        #FIXME: create profile in user view when merged
+#        import ipdb; ipdb.set_trace()
+        serializer.save(owner=self.request.user.profile, status=Job.Status.CREATED.value)
+
+    @action(
+        detail=True,
+        methods=['GET', 'PATCH'],
+#        methods=['PATCH','patch','post'],
+#        permission_classes=[IsOwner],
+    )
+    def start(self, request, pk):
+        job = Job.objects.get(pk=pk)
+        call_command('start',pk)
+        data = {'status':job.status}
+        return Response(data)
+        
+    @action(
+        detail=True,
+        methods=['GET', 'PATCH'],
+#        methods=['PATCH','patch','post'],
+#        permission_classes=[IsOwner],
+    )
+    def start(self, request, pk):
+        job = Job.objects.get(pk=pk)
+        call_command('start',pk)
+        data = {'status':job.status}
+        return Response(data)

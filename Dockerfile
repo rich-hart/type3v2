@@ -14,7 +14,6 @@ run pip3 install -r requirements/dev.txt
 
 copy . .
 
-run python3 manage.py collectstatic
-
+#run python3 manage.py collectstatic
 
 cmd gunicorn --bind 0.0.0.0:8000 project.wsgi
