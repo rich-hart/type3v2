@@ -73,7 +73,10 @@ class Classification(Job):
     description = "classify the instances in an object set"
 #    classifier = models.OneToOneField('classifiers.Classifier', on_delete=models.CASCADE)
     #TODO: classifier = #foriegn key Classifier, try to use Model string name for import
-
+    bucket = models.ForeignKey(
+        Bucket,
+        on_delete=models.CASCADE,
+    )
     @property
     def metric(self):
         #FIXME: TODO: Return objects % tagged in object_set by classifier

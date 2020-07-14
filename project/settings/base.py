@@ -15,7 +15,7 @@ STATIC_ROOT =  os.path.join(BASE_DIR, 'static')
 
 DEFAULT_FILE_STORAGE = 'project.storage_backends.MediaStorage'
 
-AWS_STORAGE_BUCKET_NAME = 'project_development'
+AWS_STORAGE_BUCKET_NAME = 'project-dev-claxotionf'
 
 AWS_REGION = 'us-east-1'
 AWS_S3_CUSTOM_DOMAIN = 's3.%s.amazonaws.com/%s' % (AWS_REGION, AWS_STORAGE_BUCKET_NAME)

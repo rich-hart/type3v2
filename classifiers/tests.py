@@ -36,12 +36,15 @@ class ClassificationView(TestCase):
         view = JobViewSet.as_view({'get':'start'})
 
         self.test_user = User.objects.create(username='test')
+        assignee = User.objects.create(username='assignee')
+
         Profile.objects.create(user=self.test_user)
         job = Classification.objects.create(owner=self.test_user.profile)
         job_url = reverse('job-list')
         job_url = os.path.join(job_url,str(job.id),'start') + '/?format=json'
         data = {
             'owner': self.test_user.profile,
+            'profile_set': [assignee.profile.id],
 #            'status': Job.Status.
         }
         #FIXME: TODO

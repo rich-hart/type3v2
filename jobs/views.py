@@ -36,21 +36,11 @@ class ClassificationViewSet(JobViewSet):
 
     def perform_create(self, serializer):
         #FIXME: create profile in user view when merged
-#        import ipdb; ipdb.set_trace()
-        serializer.save(owner=self.request.user.profile, status=Job.Status.CREATED.value)
+        instance = serializer.save(owner=self.request.user.profile, status=Job.Status.CREATED.value)
+        for user in User.objects.all():
+            assignee = Assignee.objects.create(profile=user.profile, job=instance)
 
-    @action(
-        detail=True,
-        methods=['GET', 'PATCH'],
-#        methods=['PATCH','patch','post'],
-#        permission_classes=[IsOwner],
-    )
-    def start(self, request, pk):
-        job = Job.objects.get(pk=pk)
-        call_command('start',pk)
-        data = {'status':job.status}
-        return Response(data)
-        
+
     @action(
         detail=True,
         methods=['GET', 'PATCH'],

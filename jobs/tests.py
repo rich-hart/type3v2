@@ -18,13 +18,22 @@ class TestBinaryClassificationJob(TestCase):
 #        view = ClassificationViewSet.as_view({'post':'list'})
 
         self.test_user = User.objects.create(username='test')
+        user = User.objects.create(username='assignee')
+
         Profile.objects.create(user=self.test_user)
-        job = Classification.objects.create(owner=self.test_user.profile)
+        Profile.objects.create(user=user)
+       
+#        assignee = Assignee.objects.create(profile=user.profile)         
+
+#        job = Classification.objects.create(owner=self.test_user.profile)
         job_url = reverse('classification-list')
 #        job_url = os.path.join(job_url,str(job.id),'start') + '/?format=json' 
         data = {
             'owner': self.test_user.profile.id,
+            'bucket': 'test-pitypincio',
+#            'assignee_set':[assignee.profile.id],
 #            'status': Job.Status.CREATED.value
+#            'profile_set': [{'id':user.profile.id}],
         }
         #FIXME: TODO
 #        request = factory.post(job_url, data=data,format='json')
@@ -117,11 +126,12 @@ class TestJob(TestCase):
 
         self.test_user = User.objects.create(username='test')
         Profile.objects.create(user=self.test_user)
-        job = Classification.objects.create(owner=self.test_user.profile)
+#        job = Classification.objects.create(owner=self.test_user.profile)
         job_url = reverse('job-list')
         job_url = os.path.join(job_url,str(job.id),'start') + '/?format=json' 
         data = {
             'owner': self.test_user.profile,
+            'bucket': 'test-pitypincio',
 #            'status': Job.Status.
         }
         #FIXME: TODO
