@@ -316,3 +316,4 @@ class Algorithm(Base):
     class Meta:
         abstract = True
 
+register(Object)

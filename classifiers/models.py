@@ -31,6 +31,7 @@ class Classifier(Tool):
         primary_key = False,
         unique = True,
         editable = False,
+        default = uuid.uuid4,
     )
 #    seed = models.UUIDField(
 #        primary_key = False,
