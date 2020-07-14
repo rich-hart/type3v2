@@ -47,12 +47,15 @@ class ClassificationView(TestCase):
 
 
     def test_human_classifier(self):
-        import ipdb; ipdb.set_trace()
+#        import ipdb; ipdb.set_trace()
 #        self.test_user = User.objects.create(username='test')
 #        Profile.objects.create(user=self.test_user)
 
 #        human = Human.object.create(profile=self.test_user.profile)
+        
         self.human_classifier.tag_object(self.file) 
+        data = Memory.encode('libor')
+        Memory.objects.create(id=self.human_classifier.Namespace.LABEL.uuid,data_beta=data)
         #self.file.tags.append(self.human_classifier.tag)
         classifier_url = reverse('classifier-list')
         self.client.force_login(self.test_user)

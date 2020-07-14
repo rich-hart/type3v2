@@ -13,7 +13,7 @@ from .views import *
 #NOTE TEST INSTANCE
 class TestBinaryClassificationJob(TestCase):
     def test_job_owner_human(self):
-        import ipdb; ipdb.set_trace()
+#        import ipdb; ipdb.set_trace()
 #        factory = APIRequestFactory()
 #        view = ClassificationViewSet.as_view({'post':'list'})
 

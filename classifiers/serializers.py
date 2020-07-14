@@ -15,21 +15,21 @@ class ObjectSerializer(serializers.ModelSerializer):
 
 class BinaryClassifierSerializer(serializers.ModelSerializer):
 #     object = ObjectSerializer(read_only=True)
-#     label = serializers.CharField(read_only=True)
-#     value = serializers.MultipleChoiceField(['True','False','Unknown'])
-     object_set = ObjectSerializer(read_only=True,many=True)
+     label = serializers.CharField(read_only=True)
+     
+     value = serializers.ChoiceField(['Unknown','True','False'], default ='Unknown')
+#     object_set = ObjectSerializer(read_only=True,many=True)
      class Meta:
         model = Classifier
         fields = (
             'id',
-            'object_set', # Base Model Serializer 
-#            'label',
-#            'value',
+#            'object_set', # Base Model Serializer 
+            'label',
+            'value',
         )
 
 #     def to_representation(self, instance):
-#        """Convert `username` to lowercase."""
-#         import ipdb; ipdb.set_trace()
+#         """Convert `username` to lowercase."""
 #         instance.human.object_set
          #ret = super().to_representation(instance)
 #        ret['username'] = ret['username'].lower()
@@ -37,6 +37,5 @@ class BinaryClassifierSerializer(serializers.ModelSerializer):
 #         return ret
      
 #     def to_internal_value(self, data):
-#         import ipdb; ipdb.set_trace()
 #         return data
  

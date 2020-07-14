@@ -51,6 +51,7 @@ class Label(models.Model): #FIXME: TODO --> make this general `abstract` Data cl
     #FIXME: TODO HEX BINARY for better querying
     data = models.CharField(max_length=32)
     _data = models.CharField(max_length=32)
+    data_beta = models.CharField(max_length=32) #FIXME: TODO reconcile 'data' fields 
     #FIXME: TODO 
     # def __str__ --> self.data
     # def name --> def __str__           
