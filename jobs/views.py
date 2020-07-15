@@ -14,10 +14,10 @@ class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
 
     def perform_create(self, serializer):
-        #FIXME: create profile in user view when merged
         import ipdb; ipdb.set_trace()
-        serializer.save(owner=self.request.user.profile, status=Job.Status.CREATED.value)
-        pass       
+        instance = serializer.save(owner=self.request.user.profile, status=Job.Status.CREATED.value)
+        for user in User.objects.all():
+            assignee = Assignee.objects.create(profile=user.profile, job=instance)
 
     @action(
         detail=True,
@@ -37,6 +37,8 @@ class ClassificationViewSet(JobViewSet):
 
     def perform_create(self, serializer):
         #FIXME: create profile in user view when merged
+        import ipdb; ipdb.set_trace()
+
         instance = serializer.save(owner=self.request.user.profile, status=Job.Status.CREATED.value)
         for user in User.objects.all():
             assignee = Assignee.objects.create(profile=user.profile, job=instance)
