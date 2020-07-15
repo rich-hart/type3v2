@@ -15,8 +15,9 @@ class JobViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         #FIXME: create profile in user view when merged
+        import ipdb; ipdb.set_trace()
         serializer.save(owner=self.request.user.profile, status=Job.Status.CREATED.value)
-        
+        pass       
 
     @action(
         detail=True,

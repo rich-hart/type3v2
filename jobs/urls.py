@@ -5,7 +5,8 @@ from rest_framework import routers
 from .views import *
 
 router = routers.DefaultRouter()
-router.register('',ClassificationViewSet)
+router.register('',JobViewSet)
+#router.register('classifications',ClassificationViewSet)
 
 
 urlpatterns = [

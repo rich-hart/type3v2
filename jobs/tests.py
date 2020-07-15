@@ -16,7 +16,7 @@ class TestBinaryClassificationJob(TestCase):
 #        import ipdb; ipdb.set_trace()
 #        factory = APIRequestFactory()
 #        view = ClassificationViewSet.as_view({'post':'list'})
-
+        import ipdb; ipdb.set_trace()
         self.test_user = User.objects.create(username='test')
         user = User.objects.create(username='assignee')
 
@@ -26,20 +26,25 @@ class TestBinaryClassificationJob(TestCase):
 #        assignee = Assignee.objects.create(profile=user.profile)         
 
 #        job = Classification.objects.create(owner=self.test_user.profile)
-        job_url = reverse('classification-list')
+        job_url = reverse('job-list')  + '?format=json' 
 #        job_url = os.path.join(job_url,str(job.id),'start') + '/?format=json' 
+
+        #data = {
+#            "assignee_set": [],
+        #    "classification": {
+        #        "bucket": "test-pitypincio"
+        #    }
+        #}
+
         data = {
-            'owner': self.test_user.profile.id,
-            'bucket': 'test-pitypincio',
-#            'assignee_set':[assignee.profile.id],
-#            'status': Job.Status.CREATED.value
-#            'profile_set': [{'id':user.profile.id}],
+            'assignee_set': [],
+            'classification':{'bucket': 'asdf'},
         }
         #FIXME: TODO
 #        request = factory.post(job_url, data=data,format='json')
 #        response = view(request)                   
         self.client.force_login(self.test_user)
-        response = self.client.post(job_url, data,format='json', follow=True)
+        response = self.client.post(job_url, data,format='json', follow=True, content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     @unittest.skip("NotImplemented")

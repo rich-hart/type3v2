@@ -49,6 +49,11 @@ class Classifier(Tool):
             value = self.ROOT_NAMESPACE.value + self.value
             return uuid.uuid3(uuid.NAMESPACE_DNS, value)
 
+    @property
+    def namespaces(self):
+        return [ namespace for _, namespace in enumerate(self.Namespace) ]
+
+
 #    seed = models.UUIDField(
 #        primary_key = False,
 #        unique = True,

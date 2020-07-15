@@ -55,7 +55,7 @@ class ClassificationView(TestCase):
         
         self.human_classifier.tag_object(self.file) 
         data = Memory.encode('libor')
-        Memory.objects.create(id=self.human_classifier.Namespace.LABEL.uuid,data_beta=data)
+        Memory.objects.create(id=self.human_classifier.Namespace.LABEL.uuid,_data=data)
         #self.file.tags.append(self.human_classifier.tag)
         classifier_url = reverse('classifier-list')
         self.client.force_login(self.test_user)
