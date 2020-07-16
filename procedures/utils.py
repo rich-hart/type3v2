@@ -7,9 +7,10 @@ import pandas
 from bases.models import Object
 from buckets.models import *
 from tools.models import *
-from .apps import worker_queue
+from .apps import worker_queue, get_task_logger
+import celery
 
-
+logger = get_task_logger(__name__)
 
 HashObjects = List[str]
 ModelObjects = List[Object]
@@ -30,6 +31,49 @@ object_hierarchy = [
     'file',
     'image',
 ]
+
+class Task(celery.Task):
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        print('{0!r} failed: {1!r}'.format(task_id, exc))
+
+@worker_queue.task(bind=True, base=Task)
+def start(self, *args):
+    logger.info(self.request.id)
+    return args
+
+@worker_queue.task(bind=True, base=Task)
+def stop(self, *args):
+    logger.info(self.request.id)
+    return args
+
+@worker_queue.task(bind=True, base=Task)
+def begin(*args):
+    logger.info(self.request.id)
+    return args
+
+
+@worker_queue.task(bind=True, base=Task)
+def end(*args):
+    logger.info(self.request.id)
+    return args
+
+@worker_queue.task(bind=True, base=Task)
+def execute(*args):
+    logger.info(self.request.id)
+    return args
+
+@worker_queue.task(bind=True, base=Task)
+def terminate(*args):
+    logger.info(self.request.id)
+    return args
+
+@worker_queue.task(bind=True, base=Task)
+def double(self, x):
+    return x * 2
+
+@worker_queue.task(bind=True, base=Task)
+def triple(self, x):
+    return x * 3
 
 def retrieve(cast, index, *objects):
     object = objects[index]
@@ -259,3 +303,7 @@ def add(x, y):
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
 
+
+DEFAULT_SCHEDULE = {
+    'double':['triple']
+}

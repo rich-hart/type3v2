@@ -1,21 +1,51 @@
 from django.db import models
-from neomodel import StructuredNode, StringProperty, StructuredRel, RelationshipTo
+from neomodel import StructuredNode, StringProperty, StructuredRel, RelationshipTo, ZeroOrOne, IntegerProperty, ZeroOrMore, One, RelationshipFrom
 #from project.celery import app as celery_app, get_task_logger
-
+from networkx import nx
 import celery
 from .apps import worker_queue, get_task_logger 
 
 
-#class Dependency(StructuredRel):
-#    pass
+class Dependency(StructuredRel):
 #    since = DateTimeProperty(
 #        default=lambda: datetime.now(pytz.utc)
 #    )
-#    met = StringProperty()
+    TYPES = {'S': 'Schedule', 'P': 'Procedure'}
+    type = StringProperty(required=True, choices=TYPES)
+    id = IntegerProperty(required=True)
 
 class Task(StructuredNode):
     name = StringProperty(unique_index=True)
-    dependencies = RelationshipTo('Task', 'DEPENDENCY')
+
+class Queue(StructuredNode):
+    task = RelationshipFrom('Task', 'task')
+    dependencies = RelationshipTo('Queue', 'DEPENDENCY', cardinality=ZeroOrMore, model=Dependency)
+
+class Schedule(StructuredNode):
+    name = StringProperty(unique_index=True)
+    root = RelationshipFrom('Queue', 'END', cardinality=One)
+
+class Procedure(StructuredNode):
+    name = StringProperty(unique_index=True)
+    root = RelationshipFrom('Queue', 'TERMINATE', cardinality=One)
+
+
+#    dependencies = RelationshipTo('Procedure', 'DEPENDENCY', cardinality=ZeroOrMore, model=Dependency)
+
+#    root = RelationshipTo('Schedule', 'END', cardinality=ZeroOrOne)
+
+#    root = RelationshipTo('Task', 'END', cardinality=One)
+
+#class ScheduleRelation(StructuredRel):
+#    index = IntegerProperty()
+
+
+
+
+DEFAULT_PROCEDURE = {
+    'default': [],
+}
+
 # NOTE: Tools and procedures should be defined last. 
 # Create your models here.
 
@@ -36,32 +66,43 @@ logger = get_task_logger(__name__)
 
 #A task being bound means the first argument to the task will always be the task instance (self), just like Python bound methods:
 
-@worker_queue.task(bind=True)
-def add(self, x, y):
-    logger.info(self.request.id)
-
-class MyTask(celery.Task):
-
-    def on_failure(self, exc, task_id, args, kwargs, einfo):
-        print('{0!r} failed: {1!r}'.format(task_id, exc))
-
-@worker_queue.task(base=MyTask)
-def my_add(x, y):
-    raise KeyError()
-
-@worker_queue.task
-def start(*args):
-    return args
-
-@worker_queue.task
-def end(*args):
-    return args
 
 
-DEFAULT_SCHEDULE = {
-   'end' : ['start']
-}
 
+
+
+#DEFAULT_SCHEDULE = {
+#  'end': ['start'],
+#}
+
+#DEFAULT_PROCEDURE = [
+#  DEFAULT_SCHEDULE,
+#]
+
+#TODO  Move to utils
+class Scheduler(nx.DiGraph):
+    _execution_sequence = None
+
+    @property
+    def execution_sequence(self):
+        if not self._execution_sequence:
+            self._execution_sequence = list(nx.algorithms.dag.topological_sort(self))
+        return self._execution_sequence
+
+    @property
+    def dict_of_lists(self):
+        return nx.convert.to_dict_of_lists(self)
+
+    def __init__(self, dependencies=None, reverse=True, name='default'):
+
+        if reverse:
+            dependency_graph = nx.DiGraph(dependencies)
+            execution_graph = dependency_graph.reverse(copy=False)
+            executions = nx.convert.to_dict_of_lists(execution_graph)
+        else:
+            executions = dependencies
+        super(Scheduler, self).__init__(executions)
+        self.name = name
 #        Task.create
 #NOTE: https://docs.celeryproject.org/en/stable/userguide/tasks.html#names
 #>>> @app.task(name='sum-of-two-numbers')
