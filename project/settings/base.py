@@ -6,6 +6,7 @@ INSTALLED_APPS += depends.build(
     'classifiers',
     'tools',
     'jobs',
+    'procedures',
 )
 
 INSTALLED_APPS = list(set(INSTALLED_APPS))
@@ -36,4 +37,29 @@ MONGO_HOST = '0.0.0.0' #localhost
 MONGO_DATABASE = os.environ.get('MONGO_INITDB_DATABASE','test-project')
 MONGO_USERNAME = os.environ.get('MONGO_INITDB_ROOT_USERNAME','guest')
 MONGO_PASSWORD = os.environ.get('MONGO_INITDB_ROOT_PASSWORD','guest')
+
+NEOMODEL_NEO4J_BOLT_URL = os.environ.get('NEO4J_BOLT_URL', 'bolt://neo4j:test@localhost:7687')
+NEOMODEL_ENCRYPTED_CONNECTION = False
+NEOMODEL_SIGNALS = True
+NEOMODEL_MAX_POOL_SIZE = 50
+#NEOMODEL_NEO4J_BOLT_URL = os.environ.get('NEO4J_BOLT_URL', 'bolt://neo4j:neo4j@neo4j:7687')
+
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'amqp://guest:guest@queue:5672//')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND','amqp://guest:guest@queue:5672//')
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        "NAME": os.environ.get("SQL_DATABASE","project"),
+        "USER": os.environ.get("SQL_USER", "root"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
+    }
+}
+
 from .local import *

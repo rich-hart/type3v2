@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     #NOTE: 3rd Party apps
+    'django_neomodel',
     'rest_framework',
     'django_filters',
 ]
@@ -138,3 +139,4 @@ STATIC_URL = '/static/'
 FILE_UPLOAD_HANDLERS = [
     'django.core.files.uploadhandler.MemoryFileUploadHandler',
 ]
+

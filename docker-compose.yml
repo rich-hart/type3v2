@@ -4,13 +4,16 @@ services:
 
   db:
     image: postgres
-#    restart: always
+    restart: always
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: root
-      POSTGRES_DB: capco
+      POSTGRES_DB: project
     ports:
       - 5432:5432
+    volumes:
+      - ./data/psql:/var/lib/postgresql/data #TODO: Make sure volume is mounted
+
   adminer:
     image: adminer
 #    restart: always
@@ -33,7 +36,7 @@ services:
       - db
       - queue
     volumes:
-      - ./www/:/var/www/
+      - ./data/www/:/var/www/
   worker:
     image: project:latest
     container_name: project_worker
@@ -75,7 +78,8 @@ services:
       MONGO_INITDB_DATABASE: test-database
     ports:
       - 27017:27017
-
+    volumes:
+      - ./data/mongo:/data/db
   mongo-express:
     image: mongo-express
     restart: always
@@ -84,3 +88,15 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: guest
       ME_CONFIG_MONGODB_ADMINPASSWORD: guest
+  neo4j:
+    image: neo4j
+    restart: always
+    ports:
+      - 7474:7474
+      - 7687:7687
+    environment:
+      NEO4J_AUTH: none #dev only
+      NEO4J_cypher_default__language__version: 3.5
+    volumes:
+      - ./data/neo4j:/data 
+

@@ -5,7 +5,7 @@ import json
 from celery import signature
 from unittest import mock
 from django.test import TestCase, override_settings
-
+from neomodel import db, clear_neo4j_database
 
 from django.conf import settings
 from django.test import TestCase
@@ -19,6 +19,7 @@ from bases.models import Object
 from .apps import worker_queue
 
 from .utils import *
+from .models import *
 SEED = 42
 
 TEST_BUCKET_NAME = 'test-rsftzmqvua'
@@ -31,6 +32,15 @@ def gen_rand_str():
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(10)) 
 
+
+from neomodel import db, clear_neo4j_database
+
+class TestTasks(TestCase):
+    def setUp(self):
+        clear_neo4j_database(db)
+
+    def test(self):
+        task =Task(name='test').save() 
 #import os
 #import mock
 
