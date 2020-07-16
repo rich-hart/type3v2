@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 import io
 import numpy as np
@@ -106,11 +107,6 @@ class FSObject(Object):
         return self._cache_client
 
 
-class Bucket(FSObject):
-    def list_objects(self) -> List[str]:
-        objects = self.s3_client.list_objects(Bucket=self.name)
-        keys = [ o['Key'] for o in objects['Contents'] ]
-        return keys
 
 class Folder(FSObject):
      pass
@@ -142,6 +138,7 @@ class File(FSObject):
         default=Format.get_default(),
     )
     _path = models.FileField(storage=StaticStorage())
+    _instance = models.FileField(storage=StaticStorage())
 #    parent = models.ForeignKey(Folder, on_delete=models.CASCADE,null=True)
 #    parent = models.ForeignKey(FSObject, on_delete=models.CASCADE,null=True)
 
@@ -185,7 +182,35 @@ class File(FSObject):
         else:
             raise NotImplementedError  
             #self._array = None
+
+def get_ext(path):
+    tokens = os.path.basename(path).split(os.extsep)
+    if len(tokens) ==2:
+        return tokens[1]
+
+def get_prefix(path):
+    tokens = os.path.basename(path).split(os.extsep)
+    return tokens[0]
      
+class Bucket(FSObject):
+    def list_objects(self) -> List[str]:
+        objects = self.s3_client.list_objects(Bucket=self.name)
+        keys = [ o['Key'] for o in objects['Contents'] ]
+        return keys
+
+    def mirror_pdfs(self):
+        keys = self.list_objects()
+        folder_keys = [os.path.dirname(p) for p in keys if get_ext(p)=='pdf']     
+        pdf_keys = [os.path.basename(p) for p in keys if get_ext(p)=='pdf']     
+        files = []
+        for folder_key, pdf_key in zip(folder_keys, pdf_keys):
+            if folder_key:
+                parent = Folder.objects.create(name=folder_key,parent=self)
+            else:
+                parent = self #FIXME: NEED TO LINK TO BUCKET
+            file = File.objects.create(name=pdf_key,format='pdf',parent=parent)
+            files.append(file)
+        return files
 
 
 class Text(File): #TEXT

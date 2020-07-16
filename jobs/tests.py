@@ -27,7 +27,7 @@ class TestBinaryClassificationJob(TestCase):
 
         data = {
             'assignee_set': [],
-            'classification':{'bucket': 'asdf'},
+            'classification':{'bucket': 'test-rsftzmqvua'},
         }
 
         self.client.force_login(self.test_user)
