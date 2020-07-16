@@ -1,7 +1,9 @@
 from django.db import models
 from neomodel import StructuredNode, StringProperty
-from project.celery import app as celery_app, get_task_logger
+#from project.celery import app as celery_app, get_task_logger
+
 import celery
+from .apps import worker_queue, get_task_logger 
 
 class Task(StructuredNode):
     name = StringProperty(unique_index=True)
@@ -21,11 +23,12 @@ class Task(StructuredNode):
 # class Procedure # is many schedules 
 
 #NOTE: https://docs.celeryproject.org/en/stable/userguide/tasks.html#bound-tasks
+
 logger = get_task_logger(__name__)
 
 #A task being bound means the first argument to the task will always be the task instance (self), just like Python bound methods:
 
-@celery_app.task(bind=True)
+@worker_queue.task(bind=True)
 def add(self, x, y):
     logger.info(self.request.id)
 
@@ -34,11 +37,11 @@ class MyTask(celery.Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         print('{0!r} failed: {1!r}'.format(task_id, exc))
 
-@celery_app.task(base=MyTask)
+@worker_queue.task(base=MyTask)
 def my_add(x, y):
     raise KeyError()
 
-
+#        Task.create
 #NOTE: https://docs.celeryproject.org/en/stable/userguide/tasks.html#names
 #>>> @app.task(name='sum-of-two-numbers')
 #>>> def add(x, y):

@@ -34,13 +34,15 @@ def gen_rand_str():
 
 
 from neomodel import db, clear_neo4j_database
-
+from django.core.management import call_command
 class TestTasks(TestCase):
     def setUp(self):
         clear_neo4j_database(db)
 
     def test(self):
-        task =Task(name='test').save() 
+        call_command('load')
+        sleep(.3)
+        self.assertTrue(len(Task.nodes.all()))
 #import os
 #import mock
 
