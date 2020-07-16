@@ -47,23 +47,23 @@ def stop(self, *args):
     return args
 
 @worker_queue.task(bind=True, base=Task)
-def begin(*args):
+def begin(self,*args):
     logger.info(self.request.id)
     return args
 
 
 @worker_queue.task(bind=True, base=Task)
-def end(*args):
+def end(self,**args):
     logger.info(self.request.id)
     return args
 
 @worker_queue.task(bind=True, base=Task)
-def execute(*args):
+def execute(self,*args):
     logger.info(self.request.id)
     return args
 
 @worker_queue.task(bind=True, base=Task)
-def terminate(*args):
+def terminate(self,*args):
     logger.info(self.request.id)
     return args
 
@@ -307,3 +307,8 @@ def debug_task(self):
 DEFAULT_SCHEDULE = {
     'double':['triple']
 }
+
+DEFAULT_PROCEDURE = {
+    'default': [],
+}
+

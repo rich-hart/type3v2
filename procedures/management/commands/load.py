@@ -18,6 +18,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         import ipdb; ipdb.set_trace()
+        procedure = Procedure.get_or_create({"name": 'default'})[0]
+
         procedures = {}
         schedules = {}
         tasks = {
@@ -33,6 +35,10 @@ class Command(BaseCommand):
         end = tasks['end']
         execute = tasks['execute']
         terminate = tasks['terminate']
+
+#        p_scheduler = Scheduler(utils.DEFAULT_PROCEDURE,False)
+#        procedure = Procedure.get_or_create({"name": p_scheduler.name})[0]
+
 
         scheduler = Scheduler(utils.DEFAULT_SCHEDULE,False)
         schedule = Schedule.get_or_create({"name": scheduler.name})[0]
@@ -58,16 +64,20 @@ class Command(BaseCommand):
         for n1,n2 in zip(['begin']*len(nodes),nodes):
             scheduler.add_edge(n2,n1)
       
-        import ipdb; ipdb.set_trace()
         for name, dependencies in scheduler.dict_of_lists.items():
             queue = queues[name]
             for name in dependencies:
                 dependency = queues[name]
                 queue.dependencies.connect(dependency,{'type':'S','id':schedule.id})                
         
-        queue = queues['end']
-        schedule.root.connect(queue)
-           
+        end = queues['end']
+        schedule.root.connect(end)
+        terminate = tasks['terminate']
+        terminate = Queue(task=terminate).save()
+        terminate.dependencies.connect(end, {'type':'P','id':procedure.id})
+        procedure.root.connect(terminate)
+        procedure.save()
+
 #            dependencies = [ {"task": tasks[n] } for n in dependencies ]
                         
 #            queues[name] = Queue.create_or_update(dependencies, relationship=queue.dependencies)[0]
