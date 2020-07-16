@@ -9,3 +9,4 @@ ansible
 #https://github.com/neo4j-contrib/django-neomodel
 django_neomodel
 psycopg2-binary
+networkx
