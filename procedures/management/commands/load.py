@@ -36,20 +36,51 @@ class Command(BaseCommand):
 
         scheduler = Scheduler(utils.DEFAULT_SCHEDULE,False)
         schedule = Schedule.get_or_create({"name": scheduler.name})[0]
+
+        nodes = [ n for n in scheduler.nodes] 
+
+
+        scheduler.add_node('end')
+        scheduler.add_node('begin')
+
         queues = {} 
+
+       
 
         for name in scheduler.nodes:
             task = tasks[name]
             queues[name] = Queue(task=task).save()
-
+       
+        #END TASK
+        for n1,n2 in zip(['end']*len(nodes),nodes):
+            scheduler.add_edge(n1,n2)
+        #Begin Task
+        for n1,n2 in zip(['begin']*len(nodes),nodes):
+            scheduler.add_edge(n2,n1)
+      
+        import ipdb; ipdb.set_trace()
         for name, dependencies in scheduler.dict_of_lists.items():
             queue = queues[name]
             for name in dependencies:
                 dependency = queues[name]
-                Queue.create_or_update({"name": dependency}, relationship=queue.dependencies)
-
-        for _,queue in queues.items():
-            queue.save() 
+                queue.dependencies.connect(dependency,{'type':'S','id':schedule.id})                
+        
+        queue = queues['end']
+        schedule.root.connect(queue)
+           
+#            dependencies = [ {"task": tasks[n] } for n in dependencies ]
+                        
+#            queues[name] = Queue.create_or_update(dependencies, relationship=queue.dependencies)[0]
+              
+#            for name in dependencies:
+#                dependency = queues[name]
+#                task = tasks[name]
+#                queue = Queue.create_or_update({"task":task}, relationship=queue.dependencies)[0]
+                #Queue.create_or_update({"task": dependency}, relationship=queue.dependencies)
+                #queue.dependencies.connect(dependency,{'type':'S','id':schedule.id})
+#            queue.save()
+#        for _,queue in queues.items():
+#            queue.save() 
                 #task = Task.create_or_update(
                 #    [{"name": dependency}],
                 #    relationship=instance.dependencies,

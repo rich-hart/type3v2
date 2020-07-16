@@ -89,14 +89,14 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: guest
       ME_CONFIG_MONGODB_ADMINPASSWORD: guest
   neo4j:
-    image: neo4j
+    image: neo4j:3.3
     restart: always
     ports:
       - 7474:7474
       - 7687:7687
     environment:
       NEO4J_AUTH: none #dev only
-      NEO4J_cypher_default__language__version: 3.5
+      NEO4J_cypher_default__language__version: 3.3
     volumes:
       - ./data/neo4j:/data 
 
