@@ -1,8 +1,10 @@
+from enum import Enum
 import random
 from django.db import models
 from django.contrib.auth.models import User
 from bases.models import Label
 from tools.models import Tool
+
 import uuid
 #MONGO DB
 #class Vector(MONGODB):
@@ -31,7 +33,27 @@ class Classifier(Tool):
         primary_key = False,
         unique = True,
         editable = False,
+        default = uuid.uuid4,
     )
+
+    class Namespace(Enum):
+        ROOT_NAMESPACE = ''
+        LABEL = 'label'
+        INDEX = 'index'
+        SAMPLE = 'sample'
+        TEST = 'test'
+        TRAIN = 'train'
+
+        @property
+        def uuid(self):
+            value = self.ROOT_NAMESPACE.value + self.value
+            return uuid.uuid3(uuid.NAMESPACE_DNS, value)
+
+    @property
+    def namespaces(self):
+        return [ namespace for _, namespace in enumerate(self.Namespace) ]
+
+
 #    seed = models.UUIDField(
 #        primary_key = False,
 #        unique = True,

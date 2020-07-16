@@ -5,10 +5,8 @@ from rest_framework import routers
 from .views import *
 
 router = routers.DefaultRouter()
-#router.register('classifications', ClassificationViewSet)
+router.register('',BinaryClassifierViewSet,basename='classifier')
 
-router.register('', JobViewSet)
-#router.register('', ClassificationViewSet)
 
 urlpatterns = [
     # ex: /jobs/

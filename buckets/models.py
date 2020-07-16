@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 import io
 import numpy as np
@@ -11,7 +12,7 @@ from django.conf import settings
 from django.db import models
 from bases.models import Object, Choice
 from typing import List
-from project.storage_backends import StaticStorage
+from project.storage_backends import StaticStorage, MediaStorage
 from pdf2image import convert_from_path, convert_from_bytes
 import PIL
 #https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html
@@ -106,11 +107,6 @@ class FSObject(Object):
         return self._cache_client
 
 
-class Bucket(FSObject):
-    def list_objects(self) -> List[str]:
-        objects = self.s3_client.list_objects(Bucket=self.name)
-        keys = [ o['Key'] for o in objects['Contents'] ]
-        return keys
 
 class Folder(FSObject):
      pass
@@ -126,14 +122,11 @@ class Folder(FSObject):
 class File(FSObject):
     class Format(Choice):
         undefined = None
-        pdf = 'pdf'
         @classmethod
         def get_default(cls):
             return cls.undefined.value
-    format = None
+
     _raw = None
-    _array = None
-    _pil = None
     format = models.CharField(
         max_length=3,
         null = True,
@@ -141,7 +134,8 @@ class File(FSObject):
         choices=Format.get_choices(),
         default=Format.get_default(),
     )
-    _path = models.FileField(storage=StaticStorage())
+    _path = models.FileField(storage=StaticStorage()) #FIXME: DEPRICATE
+    _instance = models.FileField(storage=MediaStorage())
 #    parent = models.ForeignKey(Folder, on_delete=models.CASCADE,null=True)
 #    parent = models.ForeignKey(FSObject, on_delete=models.CASCADE,null=True)
 
@@ -152,9 +146,30 @@ class File(FSObject):
     def raw(self):
         return self._raw
 
-    @property
-    def array(self, type):
-        return self._array
+#    def cache(self):
+#        output = io.BytesIO() 
+#        self._pil.save(output, format = self.format)
+#        output.flush()
+#        output.seek(0)
+#        self._raw = output.read()
+#        self.cache_client.set(self.tag.hex, self._raw)
+
+
+    def load(self):
+        self._raw = self.cache_client.get(self.tag.hex)
+        if self._raw:
+            return
+        elif isinstance(self.root, Bucket): 
+            fileobj = self.s3_client.get_object(
+                Bucket=self.root.name,
+                Key=self.name,
+            )
+            self._raw = fileobj['Body'].read()
+        else:
+            raise NotImplementedError  
+            #self._array = None
+
+class PDF(File):
 
 #    def cache(self):
 #        output = io.BytesIO() 
@@ -185,7 +200,48 @@ class File(FSObject):
         else:
             raise NotImplementedError  
             #self._array = None
-     
+
+
+def get_ext(path):
+    tokens = os.path.basename(path).split(os.extsep)
+    if len(tokens) ==2:
+        return tokens[1]
+
+def get_prefix(path):
+    tokens = os.path.basename(path).split(os.extsep)
+    return tokens[0]
+
+from django.core.files.storage import default_storage
+ 
+class Bucket(FSObject):
+    def list_objects(self) -> List[str]:
+        objects = self.s3_client.list_objects(Bucket=self.name)
+        keys = [ o['Key'] for o in objects['Contents'] ]
+        return keys
+
+    def mirror_pdfs(self):
+        keys = self.list_objects()
+        folder_keys = [os.path.dirname(p) for p in keys if get_ext(p)=='pdf']     
+        pdf_keys = [os.path.basename(p) for p in keys if get_ext(p)=='pdf']     
+        pdfs = []
+        for folder_key, pdf_key in zip(folder_keys, pdf_keys):
+            if folder_key:
+                parent = Folder.objects.create(name=folder_key,parent=self)
+            else:
+                parent = self #FIXME: NEED TO LINK TO BUCKET
+            pdf = PDF.objects.create(name=pdf_key,parent=parent)
+            path = os.path.join(folder_key,pdf_key)
+            copy_source = {
+                'Bucket': self.name,
+                'Key': path
+            }
+            pdf._instance.save(pdf_key,io.BytesIO()) #TouchFile to load urls
+            pdf._instance.close()
+            dest_bucket = pdf._instance.storage.bucket.name
+            dest_key = os.path.join(pdf._instance.storage.location, pdf._instance.name)
+            self.s3_client.copy(copy_source, dest_bucket, dest_key)
+            pdfs.append(pdf)
+        return pdfs
 
 
 class Text(File): #TEXT
@@ -256,6 +312,8 @@ class Text(File): #TEXT
 #    def __call__(self):
 #        pass
 class Image(File):
+    _pil = None
+    _array = None
     class Format(Choice):
         undefined = None
         png = 'png'
@@ -274,6 +332,27 @@ class Image(File):
     @property
     def pil(self):
         return self._pil
+
+    @property
+    def array(self, type):
+        return self._array
+
+    def load(self):
+        self._raw = self.cache_client.get(self.tag.hex)
+        if self._raw:
+            return
+        elif isinstance(self.root, Bucket): 
+            fileobj = self.s3_client.get_object(
+                Bucket=self.root.name,
+                Key=self.name,
+            )
+            self._raw = fileobj['Body'].read()
+            input = io.BytesIO(self._raw)
+            self._pil = PIL.Image.open(input)
+        else:
+            raise NotImplementedError  
+            #self._array = None
+
 
 #    def save(self):
 #        raise NotImplementedError('CHECK ME')

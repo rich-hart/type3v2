@@ -24,16 +24,30 @@ ModelObjects = List[Object]
 #FIXME TODO Decorate index!!!
 # FIXME TODO Make general process factory for scheduling
 
-def retrieve(index, *objects, cast='fsobject'):
+object_hierarchy = [
+    'fsobject',
+    'bucket',
+    'file',
+    'image',
+]
+
+def retrieve(cast, index, *objects):
     object = objects[index]
     if not isinstance(object, Object):
-        raise NotImplementedError('need to figure out object loading')
-    if cast:
-        object = getattr(object,cast)
+        object = Object.objects.get(tag=object)
+
+    for type in object_hierarchy:
+        if hasattr(object, type):
+            object = getattr(object, type)
+        if cast == type:
+            break
+#    if hasattr(object,:
+#        object = getattr(object,cast)
     return object
 
-def process(objects: HashObjects, index: int, method: str) -> HashObjects: #TODO: options
-    object = retrieve(index, *objects)
+def process(objects: HashObjects, index: int, method: str, type: str) -> HashObjects: #TODO: options
+    import ipdb; ipdb.set_trace()
+    object = retrieve(type, index, *objects)
     objects = getattr(object, method)()
     return objects
 
@@ -46,6 +60,7 @@ def get_prefix(path):
     tokens = os.path.basename(path).split(os.extsep)
     return tokens[0]
 
+#FIXME: DEPRICATED
 def mirror_pdfs(keys):
 #    for key in keys:
     folder_keys = [os.path.dirname(p) for p in keys if get_ext(p)=='pdf']     
@@ -61,7 +76,7 @@ def mirror_pdfs(keys):
     return files
 
 def load_file(index, *files):
-    file[index].load()
+    files[index].load()
     return files
 from io import BytesIO
 import PIL

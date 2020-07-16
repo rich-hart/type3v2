@@ -49,8 +49,9 @@ class Label(models.Model): #FIXME: TODO --> make this general `abstract` Data cl
     )
     #FIXME: TODO # MAKE _data 
     #FIXME: TODO HEX BINARY for better querying
-    data = models.CharField(max_length=32)
+#    data = models.CharField(max_length=32)
     _data = models.CharField(max_length=32)
+#    data_beta = models.CharField(max_length=32) #FIXME: TODO reconcile 'data' fields 
     #FIXME: TODO 
     # def __str__ --> self.data
     # def name --> def __str__           
@@ -156,15 +157,7 @@ class Memory(Label): #FIXME: Make this concreat memory base class
  
 
 
-    @property
-    def data(self):
-        data = {}
-        for _, space in self.namespaces:
-                value = self.retrieve(space.hash)
-                value = self.decode(value)
-                name = space.value.lower()
-                data[name] = value
-        return data
+
 
 
 
@@ -249,18 +242,27 @@ class Base(models.Model):
         object_label_hex = uuid.uuid3(self.OBJECT_NAMESPACE, self.tag.hex)
         object_label = object.class_name
         data = Label.encode_string(object_label) 
-        Label.objects.update_or_create(id=object_label_hex, data=data)
+        Label.objects.update_or_create(id=object_label_hex, _data=data)
 
         app_label_hex = uuid.uuid3(self.APP_NAMESPACE, self.tag.hex)
         app_label = object.app_name
         data = Label.encode_string(app_label)
-        Label.objects.update_or_create(id=app_label_hex, data=data)
+        Label.objects.update_or_create(id=app_label_hex, _data=data)
 
 #?????
 #    def add_tag(self, instance):
 #        self.tags.append(instance.tag) OR instance.tags.append(self.tag)
 #?????
 
+    @property
+    def data(self):
+        data = {}
+        for _, space in self.namespaces:
+                value = self.retrieve(space.hash)
+                value = self.decode(value)
+                name = space.value.lower()
+                data[name] = value
+        return data
 
     def create_tag(self, name, description=None):
         label = Label.objects.create(name=name,description=description)
@@ -316,3 +318,4 @@ class Algorithm(Base):
     class Meta:
         abstract = True
 
+register(Object)
