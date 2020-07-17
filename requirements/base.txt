@@ -10,3 +10,4 @@ ansible
 django_neomodel
 psycopg2-binary
 networkx
+#django-celery-results

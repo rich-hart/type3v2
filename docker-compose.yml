@@ -9,16 +9,16 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: root
       POSTGRES_DB: project
-    ports:
-      - 5432:5432
-    volumes:
-      - ./data/psql:/var/lib/postgresql/data #TODO: Make sure volume is mounted
+#    ports:
+#      - 5432:5432
+#    volumes:
+#      - ./data/psql:/var/lib/postgresql/data #TODO: Make sure volume is mounted
 
   adminer:
     image: adminer
 #    restart: always
-#    ports:
-#      - 8081:8080
+    ports:
+      - 8080:8080
   backend:
     image: project:latest
     container_name: project_backend
@@ -30,13 +30,14 @@ services:
 #      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 #      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 #      - DJANGO_JWT_REDIRECT=next
+      - NEO4J_BOLT_URL=bolt://neo4j:neo4j@neo4j:7687
       - CELERY_BROKER_URL=amqp://guest:guest@queue:5672//
       - CELERY_RESULT_BACKEND=amqp://guest:guest@queue:5672//
     depends_on:
       - db
       - queue
-    volumes:
-      - ./data/www/:/var/www/
+#    volumes:
+#      - ./data/www/:/var/www/
   worker:
     image: project:latest
     container_name: project_worker
@@ -45,6 +46,7 @@ services:
       - SQL_HOST=db
 #      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 #      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - NEO4J_BOLT_URL=bolt://neo4j:neo4j@neo4j:7687
       - CELERY_BROKER_URL=amqp://guest:guest@queue:5672//
       - CELERY_RESULT_BACKEND=amqp://guest:guest@queue:5672//
       - DJANGO_SETTINGS_MODULE=project.settings.dev
@@ -64,8 +66,8 @@ services:
   cache:
     container_name: memcached
     image: memcached
-    ports:
-      - 11211:11211
+#    ports:
+#      - 11211:11211
 
 
   mongo:
@@ -76,10 +78,10 @@ services:
       MONGO_INITDB_ROOT_USERNAME: guest
       MONGO_INITDB_ROOT_PASSWORD: guest
       MONGO_INITDB_DATABASE: test-database
-    ports:
-      - 27017:27017
-    volumes:
-      - ./data/mongo:/data/db
+#    ports:
+#      - 27017:27017
+#    volumes:
+#      - ./data/mongo:/data/db
   mongo-express:
     image: mongo-express
     restart: always
@@ -93,10 +95,10 @@ services:
     restart: always
     ports:
       - 7474:7474
-      - 7687:7687
+#      - 7687:7687
     environment:
       NEO4J_AUTH: none #dev only
       NEO4J_cypher_default__language__version: 3.3
-    volumes:
-      - ./data/neo4j:/data 
+#    volumes:
+#      - ./data/neo4j:/data 
 

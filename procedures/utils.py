@@ -1,15 +1,18 @@
 import os
+import celery
 from typing import List
 import pymongo
 from pymongo import MongoClient
 import pytesseract
 import pandas
 from bases.models import Object
+from celery import Celery
+from celery.utils.log import get_task_logger
+
+
 from buckets.models import *
 from tools.models import *
-from .apps import worker_queue, get_task_logger
-import celery
-
+#from .apps import worker_queue, get_task_logger
 logger = get_task_logger(__name__)
 
 HashObjects = List[str]
@@ -32,48 +35,40 @@ object_hierarchy = [
     'image',
 ]
 
-class Task(celery.Task):
-    def on_failure(self, exc, task_id, args, kwargs, einfo):
-        print('{0!r} failed: {1!r}'.format(task_id, exc))
 
-@worker_queue.task(bind=True, base=Task)
-def start(self, *args):
-    logger.info(self.request.id)
-    return args
+#@worker_queue.task(bind=True, base=Task)
+#def start(self, *args):
+#    logger.info(self.request.id)
+#    return args
+#
+#@worker_queue.task(bind=True, base=Task)
+#def stop(self, *args):
+#    logger.info(self.request.id)
+#    return args
 
-@worker_queue.task(bind=True, base=Task)
-def stop(self, *args):
-    logger.info(self.request.id)
-    return args
-
-@worker_queue.task(bind=True, base=Task)
-def begin(self,*args):
-    logger.info(self.request.id)
-    return args
+#@worker_queue.task(bind=True, base=Task)
+#def begin(self,*args):
+#    logger.info(self.request.id)
+#    return args
 
 
-@worker_queue.task(bind=True, base=Task)
-def end(self,**args):
-    logger.info(self.request.id)
-    return args
 
-@worker_queue.task(bind=True, base=Task)
-def execute(self,*args):
-    logger.info(self.request.id)
-    return args
 
-@worker_queue.task(bind=True, base=Task)
-def terminate(self,*args):
-    logger.info(self.request.id)
-    return args
+#@worker_queue.task(bind=True, base=Task)
+#def end(self,*args):
+#    logger.info(self.request.id)
+#    return args
 
-@worker_queue.task(bind=True, base=Task)
-def double(self, x):
-    return x * 2
+#@worker_queue.task(bind=True, base=Task)
+#def execute(self,*args):
+#    logger.info(self.request.id)
+#    return args
+#
+#@worker_queue.task(bind=True, base=Task)
+#def terminate(self,*args):
+#    logger.info(self.request.id)
+#    return args
 
-@worker_queue.task(bind=True, base=Task)
-def triple(self, x):
-    return x * 3
 
 def retrieve(cast, index, *objects):
     object = objects[index]
@@ -196,22 +191,6 @@ def save_image(index, *images):
 
 
 
-@worker_queue.task
-def walk(buckets: HashObjects, index: int) -> HashObjects:
-    raise NotImplementedError
-    return files
-
-@worker_queue.task
-def convert(index, *files): #PDF --> PNG, TODO: options
-    raise NotImplementedError
-    for image in images:
-        image.cache()        
-    return images
-
-@worker_queue.task
-def save(index, *images):
-    raise NotImplementedError
-    return images
 
 #@worker_queue.task
 #def ocr(index,*images):
@@ -222,34 +201,6 @@ def save(index, *images):
 #def tfidf(index, *texts):
 #    raise NotImplementedError
 #    return vectors
-
-@worker_queue.task
-def train_svm(index, *vectors):
-    raise NotImplementedError
-    return {svm}
-
-
-
-@worker_queue.task
-def nn_encode(index, *texts):
-    raise NotImplementedError
-    return vectors
-
-@worker_queue.task
-def train_nn(index, *vectors):
-    raise NotImplementedError
-    return {nn}
-
-
-@worker_queue.task
-def svm_classify(index, *vectors): #FIXME TODO How does `classifier` app do this?
-    raise NotImplementedError
-    return labels
-
-@worker_queue.task
-def nn_classify(index, *vectors): #FIXME TODO How does `classifier` app do this?
-    raise NotImplementedError
-    return labels
 
 # TODO Make create (update or create) `Task` models command
 
@@ -287,25 +238,26 @@ def nn_classify(index, *vectors): #FIXME TODO How does `classifier` app do this?
 
 
 #NOTE FIXME WARNING `convert` might be too general for pratical server
-@worker_queue.task
-def convert(file, input='pdf', output='png'):
+#@worker_queue.task
+#def convert(file, input='pdf', output='png'):
     # at some point cache image data for later processing
-    raise NotImplementedError
+#    raise NotImplementedError
 
 
-@worker_queue.task
-def add(x, y):
-    return x + y
+#@worker_queue.task
+#def add(x, y):
+#    return x + y
 
 
 
-@worker_queue.task(bind=True)
-def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
+#@worker_queue.task(bind=True)
+#def debug_task(self):
+#    print('Request: {0!r}'.format(self.request))
 
 
 DEFAULT_SCHEDULE = {
-    'double':['triple']
+     'triple': ['double'],
+#    'double': ['triple']
 }
 
 DEFAULT_PROCEDURE = {

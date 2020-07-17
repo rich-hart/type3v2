@@ -4,7 +4,9 @@ run apt-get update
 
 run apt-get install -y  \
         python3-dev \
-        python3-pip
+        python3-pip 
+
+run apt-get install -y --fix-missing vim
 
 workdir /app
 

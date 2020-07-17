@@ -1,0 +1,61 @@
+version: '3.3'
+
+services:
+
+  db:
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/psql:/var/lib/postgresql/data #TODO: Make sure volume is mounted
+
+  adminer:
+    image: adminer
+    restart: always
+  backend:
+    image: project:latest
+    container_name: project_backend
+#    ports:
+#      - 8000:8000
+#    environment:
+#      - SQL_HOST=db
+#      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+#      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+#      - DJANGO_JWT_REDIRECT=next
+#      - CELERY_BROKER_URL=amqp://guest:guest@queue:5672//
+#      - CELERY_RESULT_BACKEND=amqp://guest:guest@queue:5672//
+    volumes:
+      - ./data/www/:/var/www/
+  worker:
+    image: project:latest
+    container_name: project_worker
+    command: celery -A project worker --loglevel=info
+#    environment:
+#      - SQL_HOST=db
+#      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+#      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+#      - CELERY_BROKER_URL=amqp://guest:guest@queue:5672//
+#      - CELERY_RESULT_BACKEND=amqp://guest:guest@queue:5672//
+#      - DJANGO_SETTINGS_MODULE=project.settings.dev
+  queue:
+    ports:
+      - 5672:5672
+      - 8080:15672
+#NOTE:FIXME check is memcache size can handle large images
+  cache:
+    ports:
+      - 11211:11211
+  mongo:
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data/mongo:/data/db
+  mongo-express:
+    ports:
+      - 8081:8081
+  neo4j:
+    ports:
+#      - 7474:7474
+      - 7687:7687
+    volumes:
+      - ./data/neo4j:/data 
+

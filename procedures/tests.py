@@ -15,8 +15,7 @@ import PIL
 from buckets.models import Bucket, File, FSObject
 
 from bases.models import Object
-
-from .apps import worker_queue
+from project.celery import app as celery_app
 
 from .utils import *
 from .models import *
@@ -102,13 +101,13 @@ class TestUtils(TestCase):
         self.assertTrue(len(images))
 
     def test_load_task(self):
-        self.assertIn('procedures.utils.debug_task', worker_queue.tasks)
+        self.assertIn('procedures.utils.debug_task', celery_app.tasks)
 
     def test_task_add(self):
         signature('procedures.utils.add', args=(2, 2), countdown=10)
 
     def test_load_task(self):
-        self.assertIn('procedures.utils.add', worker_queue.tasks)
+        self.assertIn('procedures.utils.add', celery_app.tasks)
 
     def test_task_walk(self):
         bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)

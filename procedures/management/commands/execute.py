@@ -1,7 +1,17 @@
+from __future__ import absolute_import, unicode_literals
+import celery
 import networkx as nx
 from django.core.management.base import BaseCommand, CommandError
 from neomodel.match import Traversal, OUTGOING , INCOMING , EITHER
+from procedures import utils
+from django.conf import settings
+from celery import Celery
+#from project.celery import app as celery_app
+from celery.utils.log import get_task_logger
+from project.celery import app as celery_app
 from procedures.models import *
+from procedures.tasks import CTask
+
 
 
 def bfs(root):
@@ -17,7 +27,39 @@ def bfs(root):
             next_vertexes = [ a for a in adj_list if a not in current ] 
             queue.extend(next_vertexes)
     return visited
-    
+
+#    def execute(self, parameters, synchronous=False, options=None):
+#        start_task_name = self._execution_sequence[0]
+#        priority=10
+#        queue = 'celery' if self._queue_type == 'celery' else QUEUE_MAP[start_task_name]
+#        logger.info(f"queue: {queue}")
+#
+#        start_task = celery_app.signature(
+#            start_task_name,
+#            args=(parameters,),
+#            options=options,
+#            queue=queue,
+#            priority=priority
+#        )
+#        linked_tasks = [start_task]
+#        priority -= 1
+#        for i in range(1,len(self._execution_sequence)):
+#            task_name = self._execution_sequence[i]
+#            queue = 'celery' if self._queue_type == 'celery' else QUEUE_MAP[task_name]
+#
+#            task = celery_app.signature(task_name, queue=queue, priority=priority)
+#            linked_tasks.append(task)
+#            priority -= 1
+#        if synchronous:
+#            linked_tasks[0].args=tuple()
+#            for task in linked_tasks:
+#                task=celery_app.tasks[task.name]
+#                results = task(parameters)
+#                task.on_success()
+#                parameters = results
+#        else:
+#            chain(linked_tasks).apply_async()
+   
 
 class Command(BaseCommand):
     help = 'execute procedures'
@@ -28,11 +70,65 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         #FIXME: TODO Only simple default schedule will run
         import ipdb; ipdb.set_trace()
+#        worker_queue = Celery(
+#            'procedures',
+             #broker='amqp://guest@localhost//',
+#             broker=settings.CELERY_BROKER_URL,
+#             backend=settings.CELERY_RESULT_BACKEND
+#        )
+
         schedule_dict = {}
         procedure = Procedure.get_or_create({"name":options['name']})[0]
         schedule = procedure.root.get()
         root = schedule.root.get()
         queues = bfs(root)
+        graph = {}
+
+        for id, queue in queues.items():
+            #task = queue.task.get()
+            #name = utils.Task.__module__ + "." + task.name
+            #dependencies = queue.dependencies.all()
+            #dependencies = [  utils.Task.__module__ + "." + q.task.get().name for q in dependencies  ]
+            #graph[name]=dependencies
+            dependencies = queue.dependencies.all()
+            graph[id] = [ q.id for q in dependencies ]
+
+        scheduler = Scheduler(graph)  
+        execution_sequence = scheduler.execution_sequence
+       
+        start_queue_id = execution_sequence[0]
+
+        start_queue = queues[start_queue_id]
+        #start_queue_name = start_task_name + 
+        
+#        parameters = {
+#            'index': 0
+#        }
+        parameters = 1
+        #priority = -1
+        start_task_name = CTask.__module__ + "." + start_queue.task.get().name
+        start_queue_name = start_task_name + "_" + str(start_queue.id)
+        import ipdb; ipdb.set_trace()
+        start_task = celery_app.signature( #send_task
+            start_task_name,
+            args=(parameters,),
+#            options=options,
+#            queue=start_queue_name,
+#            priority=priority
+        )
+        linked_tasks = [start_task]
+        for i in range(1,len(execution_sequence)):
+            queue_id = execution_sequence[i]
+            queue = queues[queue_id]
+            task_name = CTask.__module__ + "." + queue.task.get().name
+            queue_name = task_name + "_" + str( queue.id)            
+
+#            task = utils.worker_queue.signature(task_name, queue=queue_name)
+            task = celery_app.signature(task_name)
+            linked_tasks.append(task)
+
+        signature = celery.chain(linked_tasks)
+        result = signature.apply_async()
         #definition = dict(node_class=Task, direction=OUTGOING,
         #          relation_type='END', model=Dependency)
         #relations_traversal = Traversal(root, Task.__label__,

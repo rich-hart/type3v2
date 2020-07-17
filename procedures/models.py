@@ -3,7 +3,7 @@ from neomodel import StructuredNode, StringProperty, StructuredRel, Relationship
 #from project.celery import app as celery_app, get_task_logger
 from networkx import nx
 import celery
-from .apps import worker_queue, get_task_logger 
+#from .apps import worker_queue, get_task_logger 
 
 
 class Dependency(StructuredRel):
@@ -62,7 +62,7 @@ DEFAULT_PROCEDURE = {
 
 #NOTE: https://docs.celeryproject.org/en/stable/userguide/tasks.html#bound-tasks
 
-logger = get_task_logger(__name__)
+#logger = get_task_logger(__name__)
 
 #A task being bound means the first argument to the task will always be the task instance (self), just like Python bound methods:
 
@@ -103,6 +103,38 @@ class Scheduler(nx.DiGraph):
             executions = dependencies
         super(Scheduler, self).__init__(executions)
         self.name = name
+
+#    def execute(self, parameters, synchronous=False, options=None):
+#        start_task_name = self._execution_sequence[0]
+#        priority=10
+#        queue = 'celery' if self._queue_type == 'celery' else QUEUE_MAP[start_task_name]
+#        logger.info(f"queue: {queue}")
+#
+#        start_task = celery_app.signature(
+#            start_task_name,
+#            args=(parameters,),
+#            options=options,
+#            queue=queue,
+#            priority=priority
+#        )
+#        linked_tasks = [start_task]
+#        priority -= 1
+#        for i in range(1,len(self._execution_sequence)):
+#            task_name = self._execution_sequence[i]
+#            queue = 'celery' if self._queue_type == 'celery' else QUEUE_MAP[task_name]
+#
+#            task = celery_app.signature(task_name, queue=queue, priority=priority)
+#            linked_tasks.append(task)
+#            priority -= 1
+#        if synchronous:
+#            linked_tasks[0].args=tuple()
+#            for task in linked_tasks:
+#                task=celery_app.tasks[task.name]
+#                results = task(parameters)
+#                task.on_success()
+#                parameters = results
+#        else:
+#            chain(linked_tasks).apply_async()
 #        Task.create
 #NOTE: https://docs.celeryproject.org/en/stable/userguide/tasks.html#names
 #>>> @app.task(name='sum-of-two-numbers')
