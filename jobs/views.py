@@ -20,7 +20,7 @@ class JobViewSet(viewsets.ModelViewSet):
         for user in User.objects.all():
             assignee = Assignee.objects.create(profile=user.profile, job=instance)
         process([instance.bucket.tag],0,'mirror_pdfs','bucket')
-       
+        call_command('execute', 'ml_pipeline', instance.bucket.id 
         
     @action(
         detail=True,

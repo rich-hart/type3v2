@@ -57,7 +57,6 @@ class TestTasks(TestCase):
     def test_copy(self):
         import ipdb; ipdb.set_trace()
         bucket,_ = Bucket.objects.get_or_create(name=TEST_BUCKET_NAME)
-
         file,_ = File.objects.get_or_create(name=TEST_FILE_NAME,parent=bucket)
         files = copy_file(*[file])
 
