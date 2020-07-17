@@ -142,6 +142,31 @@ class File(FSObject):
 
 #    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
 
+    def copy(self):
+        if isinstance(self.root, Bucket):
+             if isinstance(self.parent, Folder):
+                 path = os.path.join(self.parent.name, self.name)
+             else:
+                 path = self.name
+             copy_source = {
+                 'Bucket': self.root.name,
+                 'Key': path,
+             }
+             self._instance.save(self.name, io.BytesIO()) #TouchFile to load urls
+             dest_bucket = self._instance.storage.bucket.name
+             dest_key = os.path.join(self._instance.storage.location, self._instance.name)
+             self.s3_client.copy(copy_source, dest_bucket, dest_key)      
+#            path = os.path.join(folder_key, file_key)
+#            copy_source = {
+#                'Bucket': self.name,
+#                'Key': path
+#            }
+#            pdf._instance.save(pdf_key, io.BytesIO()) #TouchFile to load urls
+#            pdf._instance.close()
+#            dest_bucket = pdf._instance.storage.bucket.name
+#            dest_key = os.path.join(pdf._instance.storage.location, pdf._instance.name)
+#            self.s3_client.copy(copy_source, dest_bucket, dest_key)
+
        
     @property
     def raw(self):
