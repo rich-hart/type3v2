@@ -72,12 +72,14 @@ class Command(BaseCommand):
         
         end = queues['end']
         schedule.root.connect(end)
-        terminate = tasks['terminate']
-        terminate = Queue(task=terminate).save()
-        terminate.dependencies.connect(end, {'type':'P','id':procedure.id})
-        procedure.root.connect(terminate)
+#        terminate = tasks['terminate']
+#        terminate = Queue(task=terminate).save()
+#        terminate.dependencies.connect(end, {'type':'P','id':procedure.id})
+        procedure.root.connect(schedule)
         procedure.save()
 
+        for queue in queues.values():
+            queue.save()
 #            dependencies = [ {"task": tasks[n] } for n in dependencies ]
                         
 #            queues[name] = Queue.create_or_update(dependencies, relationship=queue.dependencies)[0]

@@ -18,7 +18,7 @@ class Task(StructuredNode):
     name = StringProperty(unique_index=True)
 
 class Queue(StructuredNode):
-    task = RelationshipTo('Task', 'task')
+    task = RelationshipTo('Task', 'TASK', cardinality=One)
     dependencies = RelationshipTo('Queue', 'DEPENDENCY', cardinality=ZeroOrMore, model=Dependency)
 
 class Schedule(StructuredNode):
@@ -27,7 +27,7 @@ class Schedule(StructuredNode):
 
 class Procedure(StructuredNode):
     name = StringProperty(unique_index=True)
-    root = RelationshipTo('Queue', 'TERMINATE', cardinality=One)
+    root = RelationshipTo('Schedule', 'TERMINATE', cardinality=One)
 
 
 #    dependencies = RelationshipTo('Procedure', 'DEPENDENCY', cardinality=ZeroOrMore, model=Dependency)

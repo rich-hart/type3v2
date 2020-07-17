@@ -1,36 +1,66 @@
 import networkx as nx
 from django.core.management.base import BaseCommand, CommandError
+from neomodel.match import Traversal, OUTGOING , INCOMING , EITHER
 from procedures.models import *
 
-#import threading
 
-
-#def start(job_id):
-#    """thread worker function"""
-#    job = Job.objects.get(pk=job_id)
-#    job.run()
-
+def bfs(root):
+    definition = dict(node_class=Queue, direction=OUTGOING,relation_type='DEPENDENCY',model=Dependency)
+    visited, queue = dict(), [root]
+    while queue:
+        vertex = queue.pop(0)
+        if vertex.id not in visited:
+            visited[vertex.id] = vertex
+            relations_traversal = Traversal(vertex,vertex.__label__,definition)
+            adj_list = relations_traversal.all()
+            current = [v for v in visited.values()]
+            next_vertexes = [ a for a in adj_list if a not in current ] 
+            queue.extend(next_vertexes)
+    return visited
+    
 
 class Command(BaseCommand):
     help = 'execute procedures'
 
-#    def add_arguments(self, parser):
-#        parser.add_argument('job_id', type=int)
-#        parser.add_argument('--synchronous', type=bool, default=True)
+    def add_arguments(self, parser):
+        parser.add_argument('--name', type=str,default='default')
 
     def handle(self, *args, **options):
-        tasks = [t for n,t in worker_queue.tasks.items() if Task.__module__ in n]
-        default_schedule = { Task.__module__+ '.' + t: [Task.__module__+ '.'+ n for n in  d ] for t, d in DEFAULT_SCHEDULE.items() }
-        for task in tasks:
-            if task.name not in default_schedule:
-                default_schedule[task.name]=[]
-        scheduler = Scheduler(default_schedule,False)
+        #FIXME: TODO Only simple default schedule will run
+        import ipdb; ipdb.set_trace()
+        schedule_dict = {}
+        procedure = Procedure.get_or_create({"name":options['name']})[0]
+        schedule = procedure.root.get()
+        root = schedule.root.get()
+        queues = bfs(root)
+        #definition = dict(node_class=Task, direction=OUTGOING,
+        #          relation_type='END', model=Dependency)
+        #relations_traversal = Traversal(root, Task.__label__,
+        #                        definition)
+        #all_related_queues = relations_traversal.all() 
+        #relations = []
 
 
-        for task, dependencies in scheduler.dict_of_lists.items():
-            instance = Task.get_or_create({"name": task})[0]
-            for dependency in dependencies:
-                Task.create_or_update({"name": dependency}, relationship=instance.dependencies)
+#            relations_traversal = Traversal(node,Queue.__label__,definition)
+#            schedule_dict[node] = relations_traversal.all()
+            
+            
+#            relations_traversal = Traversal(node,Queue.__label__,definition)
+#            dependencies = relations_traversal.all()
+           
+        
+#        tasks = [t for n,t in worker_queue.tasks.items() if Task.__module__ in n]
+#        default_schedule = { Task.__module__+ '.' + t: [Task.__module__+ '.'+ n for n in  d ] for t, d in DEFAULT_SCHEDULE.items() }
+#        for task in tasks:
+#            if task.name not in default_schedule:
+#                default_schedule[task.name]=[]
+#        scheduler = Scheduler(default_schedule,False)
+#
+#
+#        for task, dependencies in scheduler.dict_of_lists.items():
+#            instance = Task.get_or_create({"name": task})[0]
+#            for dependency in dependencies:
+#                Task.create_or_update({"name": dependency}, relationship=instance.dependencies)
 #bobs_gizmo = Dog.get_or_create({"name": "Gizmo"}, relationship=bob.pets)
 #            Task.create_or_update(
 
