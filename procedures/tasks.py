@@ -14,6 +14,12 @@ class CTask(celery.Task):
 @shared_task
 def begin(x):
     return x
+
+@shared_task
+def mirror_bucket(*buckets,index=0):
+    import ipdb; ipdb.set_trace()
+    buckets[index].mirror('pdf')
+
 @shared_task
 def double(x):
     return x * 2

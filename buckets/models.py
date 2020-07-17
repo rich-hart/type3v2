@@ -122,6 +122,7 @@ class Folder(FSObject):
 class File(FSObject):
     class Format(Choice):
         undefined = None
+        pdf = 'pdf'
         @classmethod
         def get_default(cls):
             return cls.undefined.value
@@ -218,6 +219,34 @@ class Bucket(FSObject):
         objects = self.s3_client.list_objects(Bucket=self.name)
         keys = [ o['Key'] for o in objects['Contents'] ]
         return keys
+
+    def mirror(self, format = None):
+        keys = self.list_objects()
+        format = format.lower()
+        if format:
+            folder_keys = [os.path.dirname(p) for p in keys if get_ext(p)==format]     
+            file_keys = [os.path.basename(p) for p in keys if get_ext(p)==format]     
+        files = []
+        for folder_key, file_key in zip(folder_keys, file_keys):
+            if folder_key:
+                parent,_ = Folder.objects.get_or_create(name=folder_key,parent=self)
+            else:
+                parent = self #FIXME: NEED TO LINK TO BUCKET
+            file, _ = File.objects.get_or_create(name=file_key, parent=parent, format=format)
+#            path = os.path.join(folder_key, file_key)
+#            copy_source = {
+#                'Bucket': self.name,
+#                'Key': path
+#            }
+#            pdf._instance.save(pdf_key, io.BytesIO()) #TouchFile to load urls
+#            pdf._instance.close()
+#            dest_bucket = pdf._instance.storage.bucket.name
+#            dest_key = os.path.join(pdf._instance.storage.location, pdf._instance.name)
+#            self.s3_client.copy(copy_source, dest_bucket, dest_key)
+            files.append(file)
+        return files
+
+
 
     def mirror_pdfs(self):
         keys = self.list_objects()

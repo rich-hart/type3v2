@@ -9,8 +9,9 @@ from celery import Celery
 #from project.celery import app as celery_app
 from celery.utils.log import get_task_logger
 from project.celery import app as celery_app
-from procedures.models import *
 from procedures.tasks import CTask
+
+from procedures.models import *
 
 
 
@@ -69,7 +70,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         #FIXME: TODO Only simple default schedule will run
-        import ipdb; ipdb.set_trace()
 #        worker_queue = Celery(
 #            'procedures',
              #broker='amqp://guest@localhost//',
@@ -108,7 +108,6 @@ class Command(BaseCommand):
         #priority = -1
         start_task_name = CTask.__module__ + "." + start_queue.task.get().name
         start_queue_name = start_task_name + "_" + str(start_queue.id)
-        import ipdb; ipdb.set_trace()
         start_task = celery_app.signature( #send_task
             start_task_name,
             args=(parameters,),

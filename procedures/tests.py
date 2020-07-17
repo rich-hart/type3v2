@@ -34,15 +34,25 @@ def gen_rand_str():
 
 from neomodel import db, clear_neo4j_database
 from django.core.management import call_command
+
+TEST_BUCKET_NAME = 'test-rsftzmqvua'
+TEST_FILE_NAME = 'test.pdf'
+
 class TestTasks(TestCase):
     def setUp(self):
         clear_neo4j_database(db)
 
     def test(self):
+        import ipdb; ipdb.set_trace()
         call_command('load')
         sleep(.3)
         self.assertTrue(len(Task.nodes.all()))
         call_command('execute')
+
+    def test_mirror(self):
+        import ipdb; ipdb.set_trace()
+        bucket,_ = Bucket.objects.get_or_create(name=TEST_BUCKET_NAME)
+        files = mirror_bucket(*[bucket])
 
 #import os
 #import mock

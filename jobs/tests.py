@@ -16,7 +16,6 @@ class TestBinaryClassificationJob(TestCase):
         User.objects.all().delete()
 
     def test_job_owner_human(self):
-        import ipdb; ipdb.set_trace()
         self.test_user = User.objects.create(username='test')
         user = User.objects.create(username='assignee')
 
@@ -33,6 +32,8 @@ class TestBinaryClassificationJob(TestCase):
         self.client.force_login(self.test_user)
         response = self.client.post(job_url, data,format='json', follow=True, content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
 
     @unittest.skip("NotImplemented")
     def test_job_owner_random_bot(self):

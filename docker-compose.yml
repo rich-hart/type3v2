@@ -18,7 +18,7 @@ services:
     image: adminer
 #    restart: always
     ports:
-      - 8080:8080
+      - 9090:8080
   backend:
     image: project:latest
     container_name: project_backend
@@ -59,9 +59,9 @@ services:
   queue:
     container_name: rabbitmq
     image: rabbitmq:3-management
-#    ports:
+    ports:
 #      - 5672:5672
-#      - 8080:15672
+      - 8080:15672
 #NOTE:FIXME check is memcache size can handle large images
   cache:
     container_name: memcached

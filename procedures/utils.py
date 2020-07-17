@@ -12,6 +12,7 @@ from celery.utils.log import get_task_logger
 
 from buckets.models import *
 from tools.models import *
+from .tasks import *
 #from .apps import worker_queue, get_task_logger
 logger = get_task_logger(__name__)
 
@@ -35,6 +36,14 @@ object_hierarchy = [
     'image',
 ]
 
+DEFAULT_SCHEDULE = {
+     'mirror_bucket': [],
+#    'double': ['triple']
+}
+
+DEFAULT_PROCEDURE = {
+    'default': [],
+}
 
 #@worker_queue.task(bind=True, base=Task)
 #def start(self, *args):
@@ -255,12 +264,4 @@ def save_image(index, *images):
 #    print('Request: {0!r}'.format(self.request))
 
 
-DEFAULT_SCHEDULE = {
-     'triple': ['double'],
-#    'double': ['triple']
-}
-
-DEFAULT_PROCEDURE = {
-    'default': [],
-}
 
