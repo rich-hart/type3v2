@@ -49,7 +49,7 @@ object_hierarchy = [
 ]
 
 DEFAULT_SCHEDULE = {
-     'procedures.tasks.mirror': ['procedures.tasks.initialize'],
+     'procedures.tasks.mirror': ['jobs.tasks.initialize'],
      'procedures.tasks.copy': ['procedures.tasks.mirror'],
 #    'double': ['triple']
 }

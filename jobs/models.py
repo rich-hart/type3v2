@@ -5,7 +5,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from tagging.models import Tag, TaggedItem
-from bases.models import Base, Choice, Label 
+from bases.models import Choice, Label, Object, Base
 
 from buckets.models import Bucket
 from classifiers.models import Classifier, Human as HumanClassifier
@@ -50,6 +50,7 @@ class Assignee(Base):
     job = models.ForeignKey(
         Job,
         on_delete=models.CASCADE,
+#        related_name='assignee_job',
     )
     profile = models.ForeignKey(
         Profile,

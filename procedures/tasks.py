@@ -25,12 +25,13 @@ def initialize(ids, index=0, format='pdf', **kwargs):
     return [job.bucket.id]
 
 @shared_task
-def mirror(ids, index=0, cast='bucket', format='pdf', **kwargs):
+def mirror(ids, index=0, format='pdf', **kwargs):
     object = Object.objects.get(id=ids[index])
-    object = getattr(object,cast,object)
+    object = getattr(object,'fsobject',object)
+    object = getattr(object,'bucket',object)
 #    objects[index].mirror(format=format)
-    object.mirror(format=format)
-    object.save()
+    files = object.mirror(format=format)
+    ids = [f.id for f in files]
     return ids
 
 @shared_task
@@ -46,9 +47,10 @@ def stop(*args, **kwargs):
 #    buckets[index].mirror('pdf')
 
 @shared_task
-def copy(ids,index=0, cast='file', **kwargs):
+def copy(ids,index=0, **kwargs):
     object = Object.objects.get(id=ids[index])
-    object = getattr(object,cast,object)
+    object = getattr(object,'fsobject',object)
+    object = getattr(object,'file',object)
     object.copy()
     object.save()
     return ids
