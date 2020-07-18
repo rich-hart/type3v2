@@ -3,11 +3,11 @@ from django.core.management import call_command
 from django.apps import apps
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.db.models import signals
 from tagging.models import Tag, TaggedItem
 from bases.models import Choice, Label, Object, Base
 
-from buckets.models import Bucket
+from buckets.models import Bucket, File
 from classifiers.models import Classifier, Human as HumanClassifier
 from users.models import Profile
 #class Problem(models.Model):
@@ -95,4 +95,12 @@ class Classification(Job):
 
     def run(self):
         raise NotImplementedError
+def tag_file_with_job(sender, instance, created, **kwargs):
+    root = instance.root
+    if isinstance(root, Bucket):
+        for job in root.classification_set.all():
+            if job.tag not in instance.tags:
+                job.tag_object(instance)
+
+signals.post_save.connect(receiver=tag_file_with_job, sender=File)
 

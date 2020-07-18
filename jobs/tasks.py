@@ -13,3 +13,4 @@ def initialize(ids, index=0, case='classification', **kwargs):
 #    object.save()
     return [job.bucket.id]
 
+

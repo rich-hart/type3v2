@@ -7,10 +7,24 @@ from django.urls import reverse
 from rest_framework import status
 from django.contrib.auth.models import User
 from django.core.management import call_command
-
+from buckets.models import File, Bucket
 from .models import *
 from .views import *
 #NOTE TEST INSTANCE
+class TestJobTasks(TestCase):
+    def setUp(self):
+        Job.objects.all().delete()
+        User.objects.all().delete()
+        Object.objects.all().delete()
+#        File.objects.all().delete()
+        self.test_user = User.objects.create(username='test')
+    def test_file_signal(self):
+
+        bucket = Bucket.objects.create(name='test')
+        job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
+        file = File.objects.create(name='test',parent=bucket)
+        self.assertIn(job.tag.hex, [t.name for t in file.tags])
+
 class TestBinaryClassificationJob(TestCase):
     def setUp(self):
         User.objects.all().delete()
