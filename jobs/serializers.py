@@ -17,7 +17,7 @@ class ClassificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Classification
         fields = (
-            'id',
+#            'id',
             'bucket',
 #            'profile_set',
         )
@@ -37,7 +37,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class JobSerializer(serializers.ModelSerializer):
     classification = ClassificationSerializer()
-    profile_set = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(),many=True)
+    profile_set = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(),many=True,write_only=True)
     class Meta:
         model = Job
         fields = (
@@ -51,7 +51,7 @@ class JobSerializer(serializers.ModelSerializer):
         )
         read_only_fields=('status','owner','assignee_set')
         write_only_fields=('profile_set',)
-
+#        depth = 2
     def to_representation(self, instance):
         instance.profile_set = [a.profile for a in instance.assignee_set.all()]
         rep = super(JobSerializer, self).to_representation(instance)
