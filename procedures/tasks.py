@@ -35,6 +35,9 @@ def double(x):
 @shared_task
 def triple(x):
     return x * 3
+@shared_task
+def start(x):
+    return x
 
 @shared_task
 def stop(x):

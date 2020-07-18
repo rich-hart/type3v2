@@ -48,8 +48,7 @@ class Command(BaseCommand):
         scheduler = Scheduler(utils.DEFAULT_SCHEDULE,False)
         schedule = Schedule.create({"name": scheduler.name})[0]
 
-        import ipdb; ipdb.set_trace()
-        start_node = 'procedures.tasks.begin'
+        start_node = 'procedures.tasks.start'
         first_nodes = {n for n, d in scheduler.dict_of_lists.items() if not d }
 #        scheduler.add_edges_from(*zip(first_nodes,len(first_nodes)*['start']))
 #        edges = [ e for e in zip(first_nodes,len(first_nodes)*[start_node])]
