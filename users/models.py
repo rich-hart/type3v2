@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import signals
 
 
 from django.contrib.auth.models import User
@@ -30,6 +31,12 @@ class Account(Base):
         on_delete=models.CASCADE,
     )
 
+
+def update_or_create(sender, instance, created, **kwargs):
+    if not getattr(instance,'profile',None):
+        Profile.objects.update_or_create(user=instance)
+
+signals.post_save.connect(receiver=update_or_create, sender=User)
 #FIXME:  Auto run register_tags for global modules on startup
 
 Profile.register_tags()

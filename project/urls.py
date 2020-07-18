@@ -20,10 +20,23 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.reverse import reverse
+
+
+@api_view(['GET'])
+def api_root(request, format=None):
+    return Response({
+        'jobs': reverse('job-list', request=request, format=format),
+#        'snippets': reverse('snippet-list', request=request, format=format)
+    })
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('jobs/', include('jobs.urls')),
+    path('api/', api_root),
     path('classifiers/', include('classifiers.urls')),
 
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))

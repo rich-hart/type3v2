@@ -52,7 +52,7 @@ def copy(ids,index=0, **kwargs):
     object = getattr(object,'fsobject',object)
     object = getattr(object,'file',object)
     object.copy()
-    object.save()
+    object.save() #TODO: Move inside of copy
     return ids
 
 

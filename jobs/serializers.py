@@ -34,8 +34,8 @@ class JobSerializer(serializers.ModelSerializer):
             'classification',
             'owner',
         )
-        read_only_fields=('status','owner')
-
+        read_only_fields=('status','owner','assignee_set')
+        write_only_fields=('users',)
     def create(self, validated_data):
         classification_data = validated_data.pop("classification")
         assignee_set = validated_data.pop('assignee_set')
