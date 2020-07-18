@@ -15,12 +15,10 @@ class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
 
     def perform_create(self, serializer):
-        import ipdb; ipdb.set_trace()
         instance = serializer.save(owner=self.request.user.profile, status=Job.Status.CREATED.value)
         for user in User.objects.all():
-            assignee = Assignee.objects.create(profile=user.profile, job=instance)
-        process([instance.bucket.tag],0,'mirror_pdfs','bucket')
-        call_command('execute', 'ml_pipeline', instance.bucket.id 
+            Assignee.objects.create(profile=user.profile, job=instance)
+        call_command('start', instance.id)
         
     @action(
         detail=True,

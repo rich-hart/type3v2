@@ -12,8 +12,13 @@ class CTask(celery.Task):
         print('{0!r} failed: {1!r}'.format(task_id, exc))
 
 @shared_task
-def begin(x):
-    return x
+def begin(*args,**kwargs):
+    return args, kwargs
+
+@shared_task
+def mirror_bucket(*buckets,index=0):
+    buckets[index].mirror('pdf')
+
 
 @shared_task
 def mirror_bucket(*buckets,index=0):
@@ -30,6 +35,10 @@ def double(x):
 @shared_task
 def triple(x):
     return x * 3
+
+@shared_task
+def stop(x):
+    return x
 
 
 @shared_task

@@ -1,4 +1,7 @@
 import os
+import importlib
+import pkgutil
+
 import celery
 from typing import List
 import pymongo
@@ -18,6 +21,15 @@ logger = get_task_logger(__name__)
 
 HashObjects = List[str]
 ModelObjects = List[Object]
+
+def get_task_plugins():
+    task_plugins = {
+        finder.path : importlib.import_module(finder.path+name) 
+        for finder, name, ispkg in pkgutil.iter_modules(settings.INSTALLED_APPS,'.')
+          if 'tasks' in name 
+    }
+    return task_plugins
+
 #def scale(scalar: float, vector: Vector) -> Vector:
 #    return [scalar * num for num in vector]
 
@@ -37,7 +49,7 @@ object_hierarchy = [
 ]
 
 DEFAULT_SCHEDULE = {
-     'mirror_bucket': [],
+     'procedures.tasks.mirror_bucket': [],
 #    'double': ['triple']
 }
 

@@ -1,4 +1,5 @@
 import uuid
+from django.core.management import call_command
 from django.apps import apps
 from django.db import models
 from django.contrib.auth.models import User
@@ -86,5 +87,12 @@ class Classification(Job):
     def error(self):
         if isinstance(self.classifier, HumanClassifier):
             return float('nan')
+        raise NotImplementedError
+
+    def start(self):
+        import ipdb; ipdb.set_trace()
+        call_command('execute', self.id,'--type=job')    
+
+    def run(self):
         raise NotImplementedError
 

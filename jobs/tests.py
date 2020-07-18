@@ -16,6 +16,7 @@ class TestBinaryClassificationJob(TestCase):
         User.objects.all().delete()
 
     def test_job_owner_human(self):
+        import ipdb; ipdb.set_trace()
         self.test_user = User.objects.create(username='test')
         user = User.objects.create(username='assignee')
 

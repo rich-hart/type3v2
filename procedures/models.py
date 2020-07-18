@@ -1,15 +1,12 @@
 from django.db import models
-from neomodel import StructuredNode, StringProperty, StructuredRel, RelationshipTo, ZeroOrOne, IntegerProperty, ZeroOrMore, One, RelationshipFrom
-#from project.celery import app as celery_app, get_task_logger
+from neomodel import (
+    StructuredNode, StringProperty, StructuredRel,
+     RelationshipTo, ZeroOrOne, IntegerProperty, ZeroOrMore, One, RelationshipFrom
+)
 from networkx import nx
-import celery
-#from .apps import worker_queue, get_task_logger 
 
 
 class Dependency(StructuredRel):
-#    since = DateTimeProperty(
-#        default=lambda: datetime.now(pytz.utc)
-#    )
     TYPES = {'S': 'Schedule', 'P': 'Procedure'}
     type = StringProperty(required=True, choices=TYPES)
     id = IntegerProperty(required=True)
@@ -30,33 +27,11 @@ class Procedure(StructuredNode):
     root = RelationshipTo('Schedule', 'TERMINATE', cardinality=One)
 
 
-#    dependencies = RelationshipTo('Procedure', 'DEPENDENCY', cardinality=ZeroOrMore, model=Dependency)
-
-#    root = RelationshipTo('Schedule', 'END', cardinality=ZeroOrOne)
-
-#    root = RelationshipTo('Task', 'END', cardinality=One)
-
-#class ScheduleRelation(StructuredRel):
-#    index = IntegerProperty()
-
-
-
-
-DEFAULT_PROCEDURE = {
-    'default': [],
-}
 
 # NOTE: Tools and procedures should be defined last. 
 # Create your models here.
 
 # NOTE: Mabye always pass array of objects but only process one. 
-
-# class Task(Neo4j)
-# class Schedule
-
-# In celery task passing if objects of list returned, append it to the 
-# message objects ( should be a set of object tag hashes) Maybe with model name dict instead of set?. 
-# Try to use celery groups for task Many to Many relationships
 
 # class Procedure # is many schedules 
 

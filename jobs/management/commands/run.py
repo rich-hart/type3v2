@@ -4,11 +4,11 @@ from jobs.models import Job
 import threading
 
 
-def start(job_id):
+def run(job_id):
     """thread worker function"""
     job = Job.objects.get(pk=job_id)
     job = getattr(job,'classification',job)
-    job.start()
+    job.run()
 
 
 class Command(BaseCommand):
@@ -22,9 +22,9 @@ class Command(BaseCommand):
         job_id = options['job_id']
         synchronous = options['synchronous']
         if synchronous:
-            start(job_id)
+            run(job_id)
         else:
-            thread = threading.Thread(target=start,args=(job_id,))
+            thread = threading.Thread(target=run,args=(job_id,))
             thread.start()
 
 #        job = Job.objects.get(pk=job_id)

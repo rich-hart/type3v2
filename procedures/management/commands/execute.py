@@ -10,10 +10,11 @@ from celery import Celery
 from celery.utils.log import get_task_logger
 from project.celery import app as celery_app
 from procedures.tasks import CTask
+from procedures.utils import get_task_plugins
 
 from procedures.models import *
 
-
+get_task_plugins()
 
 def bfs(root):
     definition = dict(node_class=Queue, direction=OUTGOING,relation_type='DEPENDENCY',model=Dependency)
@@ -66,9 +67,15 @@ class Command(BaseCommand):
     help = 'execute procedures'
 
     def add_arguments(self, parser):
-        parser.add_argument('--name', type=str,default='default')
+        parser.add_argument('id', type=int)
+        parser.add_argument('--type', type=str, default='bucket', help="Object type")
+        parser.add_argument('--name', type=str, default='default', help="Procedure name")
+        parser.add_argument('--index', type=int, default=0)
 
-    def handle(self, *args, **options):
+
+    def handle(self, *args, **parameters):
+        import ipdb; ipdb.set_trace()
+        
         #FIXME: TODO Only simple default schedule will run
 #        worker_queue = Celery(
 #            'procedures',
@@ -78,7 +85,7 @@ class Command(BaseCommand):
 #        )
 
         schedule_dict = {}
-        procedure = Procedure.get_or_create({"name":options['name']})[0]
+        procedure = Procedure.get_or_create({"name":parameters['name']})[0]
         schedule = procedure.root.get()
         root = schedule.root.get()
         queues = bfs(root)
@@ -94,22 +101,36 @@ class Command(BaseCommand):
             graph[id] = [ q.id for q in dependencies ]
 
         scheduler = Scheduler(graph)  
-        execution_sequence = scheduler.execution_sequence
-       
-        start_queue_id = execution_sequence[0]
+        first_queue = queues[scheduler.execution_sequence[0]]
 
-        start_queue = queues[start_queue_id]
+        start_task = celery_app.tasks['procedures.tasks.begin']
+
+        start_task = Task.get_or_create({"name": start_task.name})[0]
+
+        start_queue = Queue().save()
+        start_queue.task.connect(start_task)
+        first_queue.dependencies.connect(first_queue,{'type':'S','id':schedule.id})
+        start_queue.save()
+        start_task.save()
+
+        execution_sequence = [start_queue.id] + scheduler.execution_sequence
+
+     
+#        start_queue_id = execution_sequence[0]
+
+#        start_queue = queues[start_queue_id]
         #start_queue_name = start_task_name + 
         
 #        parameters = {
 #            'index': 0
 #        }
-        parameters = 1
+#        parameters = 1
         #priority = -1
-        start_task_name = CTask.__module__ + "." + start_queue.task.get().name
-        start_queue_name = start_task_name + "_" + str(start_queue.id)
+#        parameters = 
+#        start_task_name = start_queue.task.get().name
+#        start_queue_name = start_task_name + "_" + str(start_queue.id)
         start_task = celery_app.signature( #send_task
-            start_task_name,
+            start_task.name,
             args=(parameters,),
 #            options=options,
 #            queue=start_queue_name,
@@ -119,8 +140,8 @@ class Command(BaseCommand):
         for i in range(1,len(execution_sequence)):
             queue_id = execution_sequence[i]
             queue = queues[queue_id]
-            task_name = CTask.__module__ + "." + queue.task.get().name
-            queue_name = task_name + "_" + str( queue.id)            
+            task_name = queue.task.get().name
+#            queue_name = task_name + "_" + str( queue.id)            
 
 #            task = utils.worker_queue.signature(task_name, queue=queue_name)
             task = celery_app.signature(task_name)
