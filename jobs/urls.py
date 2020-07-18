@@ -7,7 +7,7 @@ from .views import *
 router = routers.DefaultRouter()
 #router.register('classifications', ClassificationViewSet)
 
-router.register('', JobViewSet)
+router.register('', JobViewSet,basename='job')
 #router.register('', ClassificationViewSet)
 
 urlpatterns = [

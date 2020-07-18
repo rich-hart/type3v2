@@ -6,13 +6,19 @@ from rest_framework.response import Response
 from bases.views import IsOwner
 from django.core.management import call_command
 from procedures.utils import process 
-
+from django.contrib.auth.models import User, Group, AnonymousUser
 from .models import *
 from .serializers import *
 
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return []
+        return Job.objects.filter(owner=user.profile)
 
     def perform_create(self, serializer):
         instance = serializer.save(owner=self.request.user.profile, status=Job.Status.CREATED.value)
