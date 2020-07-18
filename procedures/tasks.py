@@ -16,25 +16,43 @@ def begin(*args,**kwargs):
     return args
 
 @shared_task
-def mirror_bucket( *objects, **kwargs):
-    buckets[index].mirror('pdf')
-    return objects
+def initialize(ids, index=0, format='pdf', **kwargs):
+    object = Object.objects.get(id=ids[index])
+    job = getattr(object,'job',object)
+#    objects[index].mirror(format=format)
+#    object.mirror(format=format)
+#    object.save()
+    return [job.bucket.id]
 
 @shared_task
-def start(*objects, **kwargs):
-    return objects
+def mirror(ids, index=0, cast='bucket', format='pdf', **kwargs):
+    object = Object.objects.get(id=ids[index])
+    object = getattr(object,cast,object)
+#    objects[index].mirror(format=format)
+    object.mirror(format=format)
+    object.save()
+    return ids
 
 @shared_task
-def stop(*objects, **kwargs):
-    return objects
+def start(*args, **kwargs):
+    return args
+
+@shared_task
+def stop(*args, **kwargs):
+    return args
 
 #@shared_task
 #def mirror_bucket(*buckets,index=0):
 #    buckets[index].mirror('pdf')
 
 @shared_task
-def copy_file(*files,index=0):
-    files[index].copy()
+def copy(ids,index=0, cast='file', **kwargs):
+    object = Object.objects.get(id=ids[index])
+    object = getattr(object,cast,object)
+    object.copy()
+    object.save()
+    return ids
+
 
 @shared_task
 def double(x):

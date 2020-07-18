@@ -49,7 +49,8 @@ object_hierarchy = [
 ]
 
 DEFAULT_SCHEDULE = {
-     'procedures.tasks.mirror_bucket': [],
+     'procedures.tasks.mirror': ['procedures.tasks.initialize'],
+     'procedures.tasks.copy': ['procedures.tasks.mirror'],
 #    'double': ['triple']
 }
 

@@ -55,9 +55,9 @@ services:
     ports:
       - 8081:8081
   neo4j:
-    ports:
+#    ports:
 #      - 7474:7474
-      - 7687:7687
+#      - 7687:7687
     volumes:
       - ./data/neo4j:/data 
 

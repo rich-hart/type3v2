@@ -72,7 +72,8 @@ class Command(BaseCommand):
         parser.add_argument('--name', type=str, default='default', help="Procedure name")
         parser.add_argument('--index', type=int, default=0)
 
-
+    #FIXME TODO parameters--> celery options
+    #FIXME TODO object.fields --> parameters
     def handle(self, *args, **parameters):
 #        import ipdb; ipdb.set_trace()
         

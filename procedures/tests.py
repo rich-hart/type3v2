@@ -50,15 +50,14 @@ class TestTasks(TestCase):
         call_command('execute')
 
     def test_mirror(self):
-        import ipdb; ipdb.set_trace()
         bucket,_ = Bucket.objects.get_or_create(name=TEST_BUCKET_NAME)
-        files = mirror_bucket(*[bucket])
+        files = mirror([bucket])
 
     def test_copy(self):
         import ipdb; ipdb.set_trace()
         bucket,_ = Bucket.objects.get_or_create(name=TEST_BUCKET_NAME)
         file,_ = File.objects.get_or_create(name=TEST_FILE_NAME,parent=bucket)
-        files = copy_file(*[file])
+        files = copy([file])
 
 #import os
 #import mock

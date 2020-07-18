@@ -37,6 +37,9 @@ services:
       - db
       - queue
       - neo4j
+      - cache
+      - mongo
+
 #    volumes:
 #      - ./data/www/:/var/www/
   worker:
@@ -54,11 +57,8 @@ services:
       - CELERY_RESULT_BACKEND=amqp://guest:guest@queue:5672//
       - DJANGO_SETTINGS_MODULE=project.settings.dev
     depends_on:
-      - db
       - backend
-      - queue
-      - cache
-      - mongo
+
   queue:
     container_name: rabbitmq
     image: rabbitmq:3-management
