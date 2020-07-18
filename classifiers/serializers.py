@@ -30,7 +30,6 @@ class BinaryClassifierSerializer(serializers.ModelSerializer):
 
 #     def to_representation(self, instance):
 #         """Convert `username` to lowercase."""
-#         import ipdb; ipdb.set_trace()
 #         memory = Memory.objects.get(id=self.instance.Namespace.LABEL.uuid)
 #         label = Memory.decord(memory._data)
 #         instance.label =  

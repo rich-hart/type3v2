@@ -90,7 +90,6 @@ class Classification(Job):
         raise NotImplementedError
 
     def start(self):
-        import ipdb; ipdb.set_trace()
         call_command('execute', self.id,'--type=job')    
 
     def run(self):

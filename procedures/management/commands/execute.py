@@ -100,20 +100,13 @@ class Command(BaseCommand):
             dependencies = queue.dependencies.all()
             graph[id] = [ q.id for q in dependencies ]
 
-        scheduler = Scheduler(graph)  
-        first_queue = queues[scheduler.execution_sequence[0]]
 
-        start_task = celery_app.tasks['procedures.tasks.begin']
+        scheduler = Scheduler(graph)
+        execution_sequence = scheduler.execution_sequence
+        start_queue = queues[execution_sequence[0]]
+        start_task = start_queue.task.get()
 
-        start_task = Task.get_or_create({"name": start_task.name})[0]
 
-        start_queue = Queue().save()
-        start_queue.task.connect(start_task)
-        first_queue.dependencies.connect(first_queue,{'type':'S','id':schedule.id})
-        start_queue.save()
-        start_task.save()
-
-        execution_sequence = [start_queue.id] + scheduler.execution_sequence
 
      
 #        start_queue_id = execution_sequence[0]
@@ -129,14 +122,14 @@ class Command(BaseCommand):
 #        parameters = 
 #        start_task_name = start_queue.task.get().name
 #        start_queue_name = start_task_name + "_" + str(start_queue.id)
-        start_task = celery_app.signature( #send_task
+        start_signature = celery_app.signature( #send_task
             start_task.name,
             args=(parameters,),
 #            options=options,
 #            queue=start_queue_name,
 #            priority=priority
         )
-        linked_tasks = [start_task]
+        linked_tasks = [start_signature]
         for i in range(1,len(execution_sequence)):
             queue_id = execution_sequence[i]
             queue = queues[queue_id]

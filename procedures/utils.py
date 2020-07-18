@@ -106,7 +106,6 @@ def retrieve(cast, index, *objects):
     return object
 
 def process(objects: HashObjects, index: int, method: str, type: str) -> HashObjects: #TODO: options
-    import ipdb; ipdb.set_trace()
     object = retrieve(type, index, *objects)
     objects = getattr(object, method)()
     return objects

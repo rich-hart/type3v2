@@ -47,7 +47,6 @@ class ClassificationView(TestCase):
 
 
     def test_human_classifier(self):
-#        import ipdb; ipdb.set_trace()
 #        self.test_user = User.objects.create(username='test')
 #        Profile.objects.create(user=self.test_user)
 
