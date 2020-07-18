@@ -74,7 +74,7 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **parameters):
-        import ipdb; ipdb.set_trace()
+#        import ipdb; ipdb.set_trace()
         
         #FIXME: TODO Only simple default schedule will run
 #        worker_queue = Celery(
@@ -122,9 +122,11 @@ class Command(BaseCommand):
 #        parameters = 
 #        start_task_name = start_queue.task.get().name
 #        start_queue_name = start_task_name + "_" + str(start_queue.id)
+        start_args = (parameters.pop('id'),)
         start_signature = celery_app.signature( #send_task
             start_task.name,
-            args=(parameters,),
+            args=start_args,
+            kwargs=parameters,
 #            options=options,
 #            queue=start_queue_name,
 #            priority=priority
@@ -137,10 +139,11 @@ class Command(BaseCommand):
 #            queue_name = task_name + "_" + str( queue.id)            
 
 #            task = utils.worker_queue.signature(task_name, queue=queue_name)
-            task = celery_app.signature(task_name)
+            task = celery_app.signature(task_name,kwargs=parameters)
             linked_tasks.append(task)
 
         signature = celery.chain(linked_tasks)
+        import ipdb; ipdb.set_trace()
         result = signature.apply_async()
         #definition = dict(node_class=Task, direction=OUTGOING,
         #          relation_type='END', model=Dependency)

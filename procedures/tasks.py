@@ -13,16 +13,24 @@ class CTask(celery.Task):
 
 @shared_task
 def begin(*args,**kwargs):
-    return args, kwargs
+    return args
 
 @shared_task
-def mirror_bucket(*buckets,index=0):
+def mirror_bucket( *objects, **kwargs):
     buckets[index].mirror('pdf')
-
+    return objects
 
 @shared_task
-def mirror_bucket(*buckets,index=0):
-    buckets[index].mirror('pdf')
+def start(*objects, **kwargs):
+    return objects
+
+@shared_task
+def stop(*objects, **kwargs):
+    return objects
+
+#@shared_task
+#def mirror_bucket(*buckets,index=0):
+#    buckets[index].mirror('pdf')
 
 @shared_task
 def copy_file(*files,index=0):
@@ -35,13 +43,7 @@ def double(x):
 @shared_task
 def triple(x):
     return x * 3
-@shared_task
-def start(x):
-    return x
 
-@shared_task
-def stop(x):
-    return x
 
 
 @shared_task
