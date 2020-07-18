@@ -20,13 +20,13 @@ class TestBinaryClassificationJob(TestCase):
         self.test_user = User.objects.create(username='test')
         user = User.objects.create(username='assignee')
 
-        Profile.objects.create(user=self.test_user)
-        Profile.objects.create(user=user)
+#        Profile.objects.create(user=self.test_user)
+#        Profile.objects.create(user=user)
        
         job_url = reverse('job-list')  + '?format=json' 
 
         data = {
-            'assignee_set': [],
+            'profile_set': [user.profile.id],
             'classification':{'bucket': 'test-rsftzmqvua'},
         }
 

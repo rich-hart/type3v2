@@ -144,7 +144,7 @@ class Command(BaseCommand):
             linked_tasks.append(task)
 
         signature = celery.chain(linked_tasks)
-        import ipdb; ipdb.set_trace()
+#        import ipdb; ipdb.set_trace()
         result = signature.apply_async()
         #definition = dict(node_class=Task, direction=OUTGOING,
         #          relation_type='END', model=Dependency)

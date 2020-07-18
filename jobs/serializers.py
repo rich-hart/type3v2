@@ -12,33 +12,55 @@ class ClassificationSerializer(serializers.ModelSerializer):
 #    profile_set = ProfileSerializer(many=True, write_only=True)
 #    assignee_set = AssigneeSerializer(many=True)
     bucket = serializers.CharField(max_length=127)
+#    profile_set = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(),many=True)
+
     class Meta:
         model = Classification
         fields = (
             'id',
             'bucket',
+#            'profile_set',
         )
         write_only_fields = ('bucket',)
-        read_only_fields = ('status',)
+        read_only_fields = (
+            'status',
+        #    'profile_set'
+        )
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = (
+            'id',
+        )
 
 
 class JobSerializer(serializers.ModelSerializer):
     classification = ClassificationSerializer()
+    profile_set = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(),many=True)
     class Meta:
         model = Job
         fields = (
             'id',
             'description',
             'status',
+            'profile_set',
             'assignee_set',
             'classification',
             'owner',
         )
         read_only_fields=('status','owner','assignee_set')
-        write_only_fields=('users',)
+        write_only_fields=('profile_set',)
+
+    def to_representation(self, instance):
+        instance.profile_set = [a.profile for a in instance.assignee_set.all()]
+        rep = super(JobSerializer, self).to_representation(instance)
+        return rep 
+
     def create(self, validated_data):
+#        import ipdb; ipdb.set_trace()
         classification_data = validated_data.pop("classification")
-        assignee_set = validated_data.pop('assignee_set')
+        profile_set = validated_data.pop('profile_set')
 
         classification_serializer = ClassificationSerializer(data=classification_data)
         classification_serializer.is_valid()
@@ -47,7 +69,12 @@ class JobSerializer(serializers.ModelSerializer):
         bucket,_ = Bucket.objects.get_or_create(name=bucket)
         validated_data['bucket']=bucket
         instance = Classification.objects.create(**validated_data)
+        instance = instance.job_ptr
+        assignee_set = [ Assignee(job=instance, profile=p) for p in profile_set]
+        Assignee.objects.bulk_create(assignee_set)
         return instance
+
+
 
 class AssigneeSerializer(serializers.ModelSerializer):
      class Meta:

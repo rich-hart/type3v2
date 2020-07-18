@@ -32,11 +32,12 @@ class Account(Base):
     )
 
 
-def update_or_create(sender, instance, created, **kwargs):
+def update_or_create_profile(sender, instance, created, **kwargs):
     if not getattr(instance,'profile',None):
-        Profile.objects.update_or_create(user=instance)
+        profile,_ = Profile.objects.update_or_create(user=instance)
+        profile.save()
 
-signals.post_save.connect(receiver=update_or_create, sender=User)
+signals.post_save.connect(receiver=update_or_create_profile, sender=User)
 #FIXME:  Auto run register_tags for global modules on startup
 
 Profile.register_tags()

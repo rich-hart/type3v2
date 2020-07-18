@@ -16,8 +16,8 @@ class JobViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save(owner=self.request.user.profile, status=Job.Status.CREATED.value)
-        for user in User.objects.all():
-            Assignee.objects.create(profile=user.profile, job=instance)
+#        for user in User.objects.all():
+#            Assignee.objects.create(profile=user.profile, job=instance)
         call_command('start', instance.id)
         
     @action(
