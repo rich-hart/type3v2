@@ -1,6 +1,8 @@
 from time import sleep
 import os
 import unittest
+import unittest
+import unittest.mock
 from django.test import TestCase
 from rest_framework.test import APITestCase
 from django.urls import reverse
@@ -8,10 +10,12 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from buckets.models import File, Bucket
+from procedures.utils import RabbitMQ as Queue
+
 from .models import *
 from .views import *
 #NOTE TEST INSTANCE
-class TestJobTasks(TestCase):
+class TestSignals(TestCase):
     def setUp(self):
         Job.objects.all().delete()
         User.objects.all().delete()
@@ -25,12 +29,39 @@ class TestJobTasks(TestCase):
         file = File.objects.create(name='test',parent=bucket)
         self.assertIn(job.tag.hex, [t.name for t in file.tags])
 
+    def test_job_signal(self):
+        bucket = Bucket.objects.create(name='test')
+#        job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
+        job = Job.objects.create(owner=self.test_user.profile)
+        self.assertTrue(Queue.exists(job.queue_name))
+#        self.assertTrue0(manager.channel.queue_declare(job.queue_name,passive=True))
+
+class TestWorker(TestCase):
+    def setUp(self):
+        User.objects.all().delete()
+#        self.patcher = unittest.mock.patch('procedures.utils.RabbitMQ')
+#        self.mockQueue = self.patcher.start()
+
+#    def target(self, messages):
+#        instance = self.mockQueue.return_value
+#        instance.__iter__.return_value = iter(messages)
+#        main()
+#        self.assertGreater(len(instance.put.call_args_list),0)
+#        return instance.put.call_args_list[0][0][0]['mappedData']
+
+#    def tearDown(self):
+#        self.patcher.stop()
+
+    def test(self):
+        pass
+
+
 class TestBinaryClassificationJob(TestCase):
     def setUp(self):
         User.objects.all().delete()
 
     def test_job_owner_human(self):
-#        import ipdb; ipdb.set_trace()
+
         self.test_user = User.objects.create(username='test')
         user = User.objects.create(username='assignee')
 
@@ -45,10 +76,12 @@ class TestBinaryClassificationJob(TestCase):
         }
 
         self.client.force_login(self.test_user)
+#        manager = Queue()
         response = self.client.post(job_url, data,format='json', follow=True, content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-
+        job = Job.objects.get(id=response.data['id'])
+        self.assertTrue(Queue.exists(job.queue_name))
 
     @unittest.skip("NotImplemented")
     def test_job_owner_random_bot(self):
