@@ -16,12 +16,7 @@ from .serializers import *
 
 class PDF_Renderer(BrowsableAPIRenderer):
     format = 'pdf'
-    template_name = 'pdf.html'
-#    template_name = 'rest_framework/pdf.html'
-#    def get_default_renderer(self, view):
-#        render = BrowsableAPIRenderer(format='pdf')
-#        render.format = 'pdf'
-#        return render
+    template = 'pdf.html'
 
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
