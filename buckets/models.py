@@ -153,22 +153,23 @@ class File(FSObject):
              src_bucket = self.root.name
              src_key = path
              dest_bucket = self._instance.storage.bucket.name
-             dest_key = os.path.join(self._instance.storage.location, self._instance.name)
 
              copy_source = {
                  'Bucket': src_bucket,
                  'Key': src_key,
              }            
-             copy_dest = {
-                 'Bucket': dest_bucket,
-                 'Key': dest_key,
-             }
+
 
 
             
 
              if self._instance.name:
+                 dest_key = os.path.join(self._instance.storage.location, self._instance.name)
                  if lazy:
+                     copy_dest = {
+                         'Bucket': dest_bucket,
+                         'Key': dest_key,
+                     }
                      dest_head_object=self.s3_client.head_object(**copy_dest)
                      dest_size = dest_head_object.get('ContentLength',0)
                      src_head_object=self.s3_client.head_object(**copy_source)
@@ -177,7 +178,8 @@ class File(FSObject):
                          return
              else:    
                  self._instance.save(self.name, io.BytesIO()) #TouchFile to load urls
-                
+                 dest_key = os.path.join(self._instance.storage.location, self._instance.name)
+               
 
 
              self.s3_client.copy(copy_source, dest_bucket, dest_key)      

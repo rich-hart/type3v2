@@ -8,11 +8,18 @@ from django.core.management import call_command
 from procedures.utils import process 
 from django.contrib.auth.models import User, Group, AnonymousUser
 from buckets.models import File
-
+from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from procedures.tasks import copy as copy_file
 
 from .models import *
 from .serializers import *
+
+class PDF_Renderer(BrowsableAPIRenderer):
+    format = 'pdf'
+#    def get_default_renderer(self, view):
+#        render = BrowsableAPIRenderer(format='pdf')
+#        render.format = 'pdf'
+#        return render
 
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
@@ -47,14 +54,26 @@ class JobViewSet(viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=['GET','POST'],
+        serializer_class = PerformSerializer,
+        renderer_classes=[
+            PDF_Renderer,
+            BrowsableAPIRenderer,
+            JSONRenderer,
+        ]
     )
     def perform(self, request, pk):
-        import ipdb; ipdb.set_trace()
+#        import ipdb; ipdb.set_trace()
+        data = {
+            "msg": None
+        }
+
         instance = self.get_object()
         queue = Queue(instance.queue_name,inactivity_timeout=.3)
 
         if 'staging_queue' not in request.session:
             request.session['staging_queue'] = []
+
+ 
 
         while len(request.session['staging_queue']) <= self.STAGING_SIZE:
             item = queue.get()
@@ -65,12 +84,24 @@ class JobViewSet(viewsets.ModelViewSet):
         for tag in request.session['staging_queue']:
             file = File.objects.get(tag=tag)
             copy_file.delay([file.id])          
+         
+        if not request.session.get('current_task'):
+            current_task = request.session['staging_queue'].pop(0) \
+                if request.session['staging_queue'] else None
+            request.session['current_task'] = current_task
 
+        if request.session['current_task']:
+            data['msg'] = 'Classify object'
+            current_task = request.session['current_task']
+            file = File.objects.get(tag=current_task)
+            instance.file = file
+            instance.classifier = self.request.user.profile.human.classifier
+            serializer = PerformSerializer(instance)
+            data.update(serializer.data)
+        else:
+            data['msg'] = 'Nothing in queue'   
         
 
-        data = {
-            "msg": None
-        }
         return Response(data) 
 
 

@@ -76,7 +76,7 @@ class TestBinaryClassificationJob(TestCase):
         job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
         file = File.objects.create(name=TEST_FILE_NAME, parent=bucket)
         file.copy()
-        file.save()
+#        file.save()
         perform_url = reverse('job-perform',args=[1])    + '?format=json' 
         self.client.force_login(self.test_user)
         response = self.client.get(perform_url, format='json', follow=True, content_type='application/json')
@@ -85,6 +85,7 @@ class TestBinaryClassificationJob(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = {}
         response = self.client.post(perform_url, data,format='json', follow=True, content_type='application/json')
+        import ipdb; ipdb.set_trace()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 

@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from bases.models import Label
 from tools.models import Tool
-
+from django.db.models import signals
 import uuid
 #MONGO DB
 #class Vector(MONGODB):
@@ -118,3 +118,8 @@ class ML(Classifier):
     def train(self, *args, **kwargs):
         raise NotImplementedError
 
+def create_human_classifier(sender, instance, created, **kwargs):
+    if created:
+        Human.objects.create(profile=instance).save()
+
+signals.post_save.connect(receiver=create_human_classifier, sender='users.Profile')

@@ -4,7 +4,7 @@ from bases.models import Object, Memory
 
 from buckets.models import Bucket, File, Image 
 from users.models import Profile
-
+from classifiers.serializers import BinaryClassifierSerializer
 
 from .models import *
 
@@ -104,6 +104,27 @@ class ObjectSerializer(serializers.ModelSerializer):
 #            'url',
         )
 
+#class BinaryClassificationSerializer(serializers.ModelSerializer):
+#    value = 
+
+class FileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = (
+            'id',
+            '_instance',
+        )
+
+class PerformSerializer(serializers.ModelSerializer):
+    file = FileSerializer(read_only=True)
+    classifier = BinaryClassifierSerializer()
+    class Meta:
+        model = Job
+        fields = (
+            'id',
+            'file',
+            'classifier',
+        )
 
 class BinaryClassifierSerializer(serializers.ModelSerializer):
 #     object = ObjectSerializer(read_only=True)
