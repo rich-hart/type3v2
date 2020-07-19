@@ -150,7 +150,7 @@ class RabbitMQ(Queue):
 
     def __next__(self):
         _, _, body = next(self.channel.consume(self.name,auto_ack=self.auto_ack_consumer,inactivity_timeout=self.inactivity_timeout))
-        item = json.loads(body)
+        item = json.loads(body) if body else None
         return item
 
     def __enter__(self):

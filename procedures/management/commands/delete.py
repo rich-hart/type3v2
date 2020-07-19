@@ -9,7 +9,6 @@ from celery import Celery
 #from project.celery import app as celery_app
 from celery.utils.log import get_task_logger
 from project.celery import app as celery_app
-from procedures.tasks import CTask
 from procedures.utils import get_task_plugins
 from neomodel import db
 

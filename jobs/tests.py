@@ -14,6 +14,10 @@ from procedures.utils import RabbitMQ as Queue
 
 from .models import *
 from .views import *
+
+TEST_BUCKET_NAME = 'test-rsftzmqvua'
+TEST_FILE_NAME = 'test.pdf'
+
 #NOTE TEST INSTANCE
 class TestSignals(TestCase):
     def setUp(self):
@@ -62,10 +66,31 @@ class TestWorker(TestCase):
 class TestBinaryClassificationJob(TestCase):
     def setUp(self):
         User.objects.all().delete()
+        self.test_user = User.objects.create(username='test')
+
+    def test_perform(self):
+        import ipdb; ipdb.set_trace()
+        user = User.objects.create(username='assignee')
+
+        bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
+        job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
+        file = File.objects.create(name=TEST_FILE_NAME, parent=bucket)
+        file.copy()
+        file.save()
+        perform_url = reverse('job-perform',args=[1])    + '?format=json' 
+        self.client.force_login(self.test_user)
+        response = self.client.get(perform_url, format='json', follow=True, content_type='application/json')
+
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {}
+        response = self.client.post(perform_url, data,format='json', follow=True, content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
 
     def test_job_owner_human(self):
 
-        self.test_user = User.objects.create(username='test')
         user = User.objects.create(username='assignee')
 
 #        Profile.objects.create(user=self.test_user)

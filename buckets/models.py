@@ -142,19 +142,44 @@ class File(FSObject):
 
 #    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
 
-    def copy(self):
+    def copy(self,lazy=True):
+        #TODO!!!!: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.copy_object
         if isinstance(self.root, Bucket):
              if isinstance(self.parent, Folder):
                  path = os.path.join(self.parent.name, self.name)
              else:
                  path = self.name
-             copy_source = {
-                 'Bucket': self.root.name,
-                 'Key': path,
-             }
-             self._instance.save(self.name, io.BytesIO()) #TouchFile to load urls
+             #https://stackoverflow.com/questions/5315603/how-do-i-get-the-file-key-size-in-boto-s3
+             src_bucket = self.root.name
+             src_key = path
              dest_bucket = self._instance.storage.bucket.name
              dest_key = os.path.join(self._instance.storage.location, self._instance.name)
+
+             copy_source = {
+                 'Bucket': src_bucket,
+                 'Key': src_key,
+             }            
+             copy_dest = {
+                 'Bucket': dest_bucket,
+                 'Key': dest_key,
+             }
+
+
+            
+
+             if self._instance.name:
+                 if lazy:
+                     dest_head_object=self.s3_client.head_object(**copy_dest)
+                     dest_size = dest_head_object.get('ContentLength',0)
+                     src_head_object=self.s3_client.head_object(**copy_source)
+                     src_size = src_head_object.get('ContentLength',0)
+                     if src_size == dest_size:
+                         return
+             else:    
+                 self._instance.save(self.name, io.BytesIO()) #TouchFile to load urls
+                
+
+
              self.s3_client.copy(copy_source, dest_bucket, dest_key)      
 #            path = os.path.join(folder_key, file_key)
 #            copy_source = {

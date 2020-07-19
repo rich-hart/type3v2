@@ -43,7 +43,6 @@ class TestTasks(TestCase):
         clear_neo4j_database(db)
 
     def test(self):
-        import ipdb; ipdb.set_trace()
         call_command('load')
         sleep(.3)
         self.assertTrue(len(Task.nodes.all()))
