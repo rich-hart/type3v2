@@ -2,14 +2,23 @@ from __future__ import absolute_import, unicode_literals
 from typing import List
 import celery
 from celery import shared_task
-from bases.models import Object
 
+from bases.models import Object
+from .queue import RabbitMQ as Queue
 HashObjects = List[str]
 ModelObjects = List[Object]
 
-class CTask(celery.Task):
-    def on_failure(self, exc, task_id, args, kwargs, einfo):
-        print('{0!r} failed: {1!r}'.format(task_id, exc))
+
+from celery import Task
+
+class Task(Task):
+    _qconn = None
+
+    @property
+    def qconn(self):
+        if self._qconn is None or self._qconn.is_closed:
+            self._qconn = Queue().connection
+        return self._qconn
 
 @shared_task
 def begin(*args,**kwargs):
@@ -24,7 +33,7 @@ def initialize(ids, index=0, format='pdf', **kwargs):
 #    object.save()
     return [job.bucket.id]
 
-@shared_task
+@shared_task(base=Task)
 def mirror(ids, index=0, format='pdf', **kwargs):
     object = Object.objects.get(id=ids[index])
     object = getattr(object,'fsobject',object)

@@ -22,12 +22,15 @@ class TestSignals(TestCase):
         Object.objects.all().delete()
 #        File.objects.all().delete()
         self.test_user = User.objects.create(username='test')
-    def test_file_signal(self):
 
+    def test_file_signal(self):
         bucket = Bucket.objects.create(name='test')
         job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
+        queue = Queue(job.queue_name) 
+        self.assertFalse(queue.qsize())
         file = File.objects.create(name='test',parent=bucket)
         self.assertIn(job.tag.hex, [t.name for t in file.tags])
+        self.assertTrue(queue.qsize())
 
     def test_job_signal(self):
         bucket = Bucket.objects.create(name='test')

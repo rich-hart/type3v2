@@ -21,6 +21,7 @@ class Job(Base):
         Profile,
         on_delete=models.CASCADE,
     )
+    _queue = None
     class Status(Choice):
         UNKNOWN = 'UN' 
         CREATED = 'CR'
@@ -34,6 +35,12 @@ class Job(Base):
         choices=Status.get_choices(),
         default=Status.UNKNOWN.value,
     )
+
+    @property
+    def queue(self):
+        if not self._queue:
+            self._queue = Queue(self.queue_name)
+        return self._queue 
 
     @property
     def queue_name(self):
@@ -114,7 +121,7 @@ def tag_file_with_job(sender, instance, created, **kwargs):
         for job in root.classification_set.all():
             if job.tag not in instance.tags:
                 job.tag_object(instance)
-
+                job.queue.put(instance.tag.hex)
 
 signals.post_save.connect(receiver=tag_file_with_job, sender=File)
 
