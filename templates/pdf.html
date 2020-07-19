@@ -1,9 +1,17 @@
 {% extends "rest_framework/base.html" %}
 
-
 {% block body %}
   {{block.super}}
   <script>
-  debugger
+    debugger
+    document.getElementById('response info')
+    response_info = document.getElementsByClassName('response-info')[0]
+    parent_element = response_info.parentElement
+    parent_element.removeChild(response_info);
+    iframe = div = document.createElement('iframe')
+    iframe.setAttribute('src', "{{response.data.file.url}}");
+    parent_element.appendChild(iframe)
   </script>
 {% endblock %}
+
+

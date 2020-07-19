@@ -108,12 +108,19 @@ class ObjectSerializer(serializers.ModelSerializer):
 #    value = 
 
 class FileSerializer(serializers.ModelSerializer):
+    url = serializers.URLField()
     class Meta:
         model = File
         fields = (
             'id',
-            '_instance',
+            'url',
         )
+        read_only_field = ('instance',)
+    def to_representation(self, instance):
+        instance.url = instance._instance.url
+        rep = super(FileSerializer, self).to_representation(instance)
+        return rep 
+
 
 class PerformSerializer(serializers.ModelSerializer):
     file = FileSerializer(read_only=True)
