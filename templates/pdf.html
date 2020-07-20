@@ -8,12 +8,33 @@
     response_info = document.getElementsByClassName('response-info')[0]
     parent_element = response_info.parentElement
     parent_element.removeChild(response_info);
-    iframe = document.createElement('iframe')
-    iframe.setAttribute('src', "{{response.data.file.url}}");
-    iframe.classList.add('pdf-frame');
-    parent_element.appendChild(iframe)
-    $('.pdf-frame').css('height', $(window).height()+'px');
-    $('.pdf-frame').css('width', $(window).width()+'px');
+//    iframe = document.createElement('iframe')
+//    iframe.setAttribute('src', "{{response.data.file.url}}");
+//    iframe.classList.add('pdf-frame');
+//      iframe.contentDocument.location.reload()
+//    parent_element.appendChild(iframe)
+    embed = document.createElement('embed')
+    embed.setAttribute('type','application/pdf')
+    embed.classList.add('pdf-frame');
+    embed.setAttribute('src',
+      "{{response.data.file.url}}#toolbar=0&zoom=95"
+    );
+    embed.setAttribute('style',"pointer-events:none;")
+    //highlight=lt,rt,top,btm 
+    parent_element.appendChild(embed)
+    //PDFium
+    //https://stackoverflow.com/questions/40639705/is-there-a-way-to-style-google-chrome-default-pdf-viewer
+    //https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_open_parameters.pdf
+//    obj = document.createElement('obj')
+//    obj.setAttribute('type','application/pdf')
+//    obj.classList.add('pdf-frame');
+//    obj.setAttribute('src',"{{response.data.file.url}}");
+//    parent_element.appendChild(obj)
+    $('.pdf-frame').css('height', '11in')
+    $('.pdf-frame').css('width', '8.5in')
+//    2550 X 3300
+//    $('.pdf-frame').css('height', $(window).height()+'px');
+//    $('.pdf-frame').css('width', $(window).width()+'px');
   </script>
 {% endblock %}
 
