@@ -8,20 +8,22 @@
     response_info = document.getElementsByClassName('response-info')[0]
     parent_element = response_info.parentElement
     parent_element.removeChild(response_info);
-//    iframe = document.createElement('iframe')
-//    iframe.setAttribute('src', "{{response.data.file.url}}");
-//    iframe.classList.add('pdf-frame');
+    iframe = document.createElement('iframe')
+    iframe.setAttribute('src', "{{response.data.file.url}}");
+    iframe.setAttribute('id', 'main-frame')
+    iframe.classList.add('pdf-frame');
+    iframe.setAttribute('style',"pointer-events:none;")
 //      iframe.contentDocument.location.reload()
-//    parent_element.appendChild(iframe)
-    embed = document.createElement('embed')
-    embed.setAttribute('type','application/pdf')
-    embed.classList.add('pdf-frame');
-    embed.setAttribute('src',
-      "{{response.data.file.url}}#toolbar=0&zoom=95"
-    );
-    embed.setAttribute('style',"pointer-events:none;")
+    parent_element.appendChild(iframe)
+//    embed = document.createElement('embed')
+//    embed.setAttribute('type','application/pdf')
+//    embed.classList.add('pdf-frame');
+//    embed.setAttribute('src',
+//      "{{response.data.file.url}}#toolbar=0&zoom=95"
+//    );
+//    embed.setAttribute('style',"pointer-events:none;")
     //highlight=lt,rt,top,btm 
-    parent_element.appendChild(embed)
+//    parent_element.appendChild(embed)
     //PDFium
     //https://stackoverflow.com/questions/40639705/is-there-a-way-to-style-google-chrome-default-pdf-viewer
     //https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_open_parameters.pdf
@@ -30,11 +32,36 @@
 //    obj.classList.add('pdf-frame');
 //    obj.setAttribute('src',"{{response.data.file.url}}");
 //    parent_element.appendChild(obj)
+
     $('.pdf-frame').css('height', '11in')
     $('.pdf-frame').css('width', '8.5in')
 //    2550 X 3300
 //    $('.pdf-frame').css('height', $(window).height()+'px');
 //    $('.pdf-frame').css('width', $(window).width()+'px');
+  </script>
+  <script>
+  //FIXME NEED BETTER PAGE RELOAD 
+  function reload_pdf(){
+    var main_frame = document.getElementById("main-frame");
+    main_frame.setAttribute('src', "{{response.data.file.url}}#zoom=50");
+    parent_element = main_frame.parentElement
+    parent_element.removeChild(main_frame);
+    iframe = document.createElement('iframe')
+    iframe.setAttribute('src', "{{response.data.file.url}}#zoom=50");
+    iframe.setAttribute('id', 'main-frame')
+    iframe.classList.add('pdf-frame');
+    iframe.setAttribute('style',"pointer-events:none;")
+//      iframe.contentDocument.location.reload()
+    parent_element.appendChild(iframe)
+
+//    var content = main_frame.innerHTML;
+//    container.innerHTML= content; 
+   //this line is to watch the result in console , you can remove it later	
+    $('.pdf-frame').css('height', '11in')
+    $('.pdf-frame').css('width', '8.5in')
+
+    console.log("Refreshed"); 
+  }
   </script>
 {% endblock %}
 
