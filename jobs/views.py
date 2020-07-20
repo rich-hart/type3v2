@@ -72,7 +72,7 @@ class JobViewSet(viewsets.ModelViewSet):
 
  
 
-        while len(request.session['staging_queue']) <= self.STAGING_SIZE:
+        while len(request.session['staging_queue']) < self.STAGING_SIZE:
             item = queue.get()
             if not item:
                 break
@@ -80,7 +80,7 @@ class JobViewSet(viewsets.ModelViewSet):
 
         for tag in request.session['staging_queue']:
             file = File.objects.get(tag=tag)
-            copy_file.delay([file.id])          
+            #copy_file.delay([file.id]) FIXME BROKEN!!!         
          
         if not request.session.get('current_task'):
             current_task = request.session['staging_queue'].pop(0) \
@@ -108,7 +108,6 @@ class JobViewSet(viewsets.ModelViewSet):
 #
 #    def perform_create(self, serializer):
 #        #FIXME: create profile in user view when merged
-#        import ipdb; ipdb.set_trace()
 #
 #        instance = serializer.save(owner=self.request.user.profile, status=Job.Status.CREATED.value)
 #        for user in User.objects.all():

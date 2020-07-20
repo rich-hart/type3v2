@@ -1,25 +1,31 @@
 from time import sleep
+import io
 import os
 import unittest
 import unittest
 import unittest.mock
+import project.urls
+from unittest.mock import MagicMock, PropertyMock
 from django.test import TestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from rest_framework.test import APITestCase
 from django.urls import reverse
 from rest_framework import status
-from django.contrib.auth.models import User
+from django.test import TestCase, override_settings
+from django.conf import settings 
+from django.contrib.auth.models import User, AnonymousUser
 from django.core.management import call_command
 from buckets.models import File, Bucket
 from procedures.utils import RabbitMQ as Queue
 from selenium.webdriver.chrome.webdriver import WebDriver
 from unittest.mock import patch
+from django.conf.urls.static import static
 from .models import *
 from .views import *
 
 TEST_BUCKET_NAME = 'test-rsftzmqvua'
 TEST_FILE_NAME = 'test.pdf'
-TEST_DATA_DIR = os.path.join(os.getcwd(),' data/tests')
+TEST_DATA_DIR = os.path.join(os.getcwd(),'data/tests')
 #NOTE TEST INSTANCE
 class TestSignals(TestCase):
     def setUp(self):
@@ -64,13 +70,22 @@ class TestWorker(TestCase):
     def test(self):
         pass
 
+TEST_MEDIA_URL = '/media/'
+TEST_MEDIA_ROOT = os.path.join(TEST_DATA_DIR,'media')
+TEST_STATIC_URL = '/static/'
+TEST_STATIC_ROOT = os.path.join(TEST_DATA_DIR,'static')
+#@override_settings(STATICFILES_DIRS=[TEST_DATA_DIR])
+#@override_settings(ROOT_URLCONF=__name__)
 
+#@override_settings(STATIC_URL=TEST_STATIC_URL)
+#@override_settings(STATIC_ROOT=TEST_DATA_DIR)
+#@override_settings(MEDIA_URL=TEST_MEDIA_URL)
+#@override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class TestLiveJob(StaticLiveServerTestCase):
     #fixtures = ['user-data.json']
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        import ipdb; ipdb.set_trace()
         cls.selenium = WebDriver('data/drivers/macos/chromedriver')
         cls.selenium.implicitly_wait(10)
 
@@ -84,38 +99,89 @@ class TestLiveJob(StaticLiveServerTestCase):
         cls.selenium.quit()
         super().tearDownClass()
 
+    def test(self):
+        pass
 
+#    @patch('project.storage_backends.MediaStorage.custom_domain', new_callable = PropertyMock)
+#    @patch('django.contrib.auth.models.AnonymousUser')
+#    @patch('jobs.views.JobViewSet.STAGING_SIZE',new_callable = PropertyMock,return_value = 1)
+#    def test_perform(self, MockSize, MockAnonymousUser,MockDomain):
+#    @override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.staticfiles_storage')
 
-
-    def test_perform(self):
-        import ipdb; ipdb.set_trace()
-        test_file_path = os.path.join(TEST_DATA_DIR,TEST_FILE_NAME)
+#    @override_settings(ROOT_URLCONF='project.tests')
+#    @override_settings(AWS_DEFAULT_ACL='public-read')
+    @patch('jobs.views.JobViewSet.perform')
+    def test_perform(self, MockView):
+#        import ipdb; ipdb.set_trace()
+#        MockDomain.return_value = self.live_server_url.replace('http://','')
+#        urlpatterns = [
+#            static(TEST_MEDIA_URL, TEST_MEDIA_ROOT),
+#        ] + project.urls.urlpatterns
+#        test_file_path = os.path.join(TEST_DATA_DIR,TEST_FILE_NAME)
+#        bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
+#        job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
+        #file = File.objects.create(name=TEST_FILE_NAME)
+        #file.copy()
         bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
-        job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
+        #job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
         file = File.objects.create(name=TEST_FILE_NAME, parent=bucket)
         file.copy()
-#        file.save()
-        perform_url = reverse('job-perform',args=[1])    + '?format=json' 
-        self.client.force_login(self.test_user)
- 
-        class mock_Instance:
-            url = 'file://' + test_file_path      
- 
-        with patch.object(File, '_instance', return_value=mock_Instance) as mock_method:
-            response = self.client.get(perform_url, format='json', follow=True, content_type='application/json')
+        file.s3_client.put_object_acl(
+            ACL='public-read',
+#            Bucket=file.root.name,
+            Bucket=file._instance.storage.bucket.name,
+            #Key=file._instance.name,
+            Key=os.path.join(file._instance.storage.location,file._instance.name),
+        )
+#        file._instance.save(TEST_FILE_NAME, io.BytesIO())
+        perform_url = reverse('job-perform',args=[1]) 
+#
+#        [ job.queue.put(file.tag.hex) for _ in range(3) ] 
+        #FIXME TODO SHOULD NOT NEED MULTIPLE CALLS
+        #patcher = patch('django.contrib.auth.models.AnonymousUser', spec=True)
+        #AnonymousUser = patcher.start()
+#        MockAnonymousUser.return_value = self.test_user
+#        stage_size_patch = patch(
+#            'jobs.views.JobViewSet.STAGING_SIZE', 
+#             new_callable = PropertyMock,
+#        )
+#        mockSize = stage_size_patch.start()
+#        mockSize.return_value = 1
+        test_endpoint = '%s%s' % (self.live_server_url, perform_url)
+        media_url = self.live_server_url + '/media/test.pdf'
+        media_url = file._instance.url
+#        self.client.force_login(self.test_user)
+#        file._instance.name = 'test.pdf'
+        data = {
+             'classifier': {'id': 1, 'value': 'Unknown'},
+             'file': {
+                 'id': 4,
+                 'url': media_url,
+             },
+             'id': 1,
+             'msg': 'Classify object'
+        }
+        MockView.return_value = Response(data)
+        self.selenium.get(test_endpoint)
 
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = {}
-        response = self.client.post(perform_url, data,format='json', follow=True, content_type='application/json')
         import ipdb; ipdb.set_trace()
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.selenium.get('%s%s' % (self.live_server_url, '/login/'))
-        username_input = self.selenium.find_element_by_name("username")
-        username_input.send_keys('myuser')
-        password_input = self.selenium.find_element_by_name("password")
-        password_input.send_keys('secret')
-        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+#        stage_size_patch.stop()
+        #patcher.stop()
+        pass
+#            username_input = self.selenium.find_element_by_name("username")
+#            username_input.send_keys('myuser')
+#            password_input = self.selenium.find_element_by_name("password")
+#            password_input.send_keys('secret')
+#            self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+
+#        patcher.stop()
+
+#        self.assertEqual(response.status_code, status.HTTP_200_OK)
+#        data = {}
+        
+#        response = self.client.post(perform_url, data,format='json', follow=True, content_type='application/json')
+#        import ipdb; ipdb.set_trace()
+#        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
 

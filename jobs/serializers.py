@@ -58,7 +58,6 @@ class JobSerializer(serializers.ModelSerializer):
         return rep 
 
     def create(self, validated_data):
-#        import ipdb; ipdb.set_trace()
         classification_data = validated_data.pop("classification")
         profile_set = validated_data.pop('profile_set')
 
@@ -150,7 +149,6 @@ class BinaryClassifierSerializer(serializers.ModelSerializer):
 
 #     def to_representation(self, instance):
 #         """Convert `username` to lowercase."""
-#         import ipdb; ipdb.set_trace()
 #         memory = Memory.objects.get(id=self.instance.Namespace.LABEL.uuid)
 #         label = Memory.decord(memory._data)
 #         instance.label =  

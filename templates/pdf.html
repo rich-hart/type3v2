@@ -8,9 +8,12 @@
     response_info = document.getElementsByClassName('response-info')[0]
     parent_element = response_info.parentElement
     parent_element.removeChild(response_info);
-    iframe = div = document.createElement('iframe')
+    iframe = document.createElement('iframe')
     iframe.setAttribute('src', "{{response.data.file.url}}");
+    iframe.classList.add('pdf-frame');
     parent_element.appendChild(iframe)
+    $('.pdf-frame').css('height', $(window).height()+'px');
+    $('.pdf-frame').css('width', $(window).width()+'px');
   </script>
 {% endblock %}
 
