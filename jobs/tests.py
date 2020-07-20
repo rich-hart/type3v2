@@ -4,6 +4,7 @@ import unittest
 import unittest
 import unittest.mock
 from django.test import TestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from rest_framework.test import APITestCase
 from django.urls import reverse
 from rest_framework import status
@@ -11,13 +12,14 @@ from django.contrib.auth.models import User
 from django.core.management import call_command
 from buckets.models import File, Bucket
 from procedures.utils import RabbitMQ as Queue
-
+from selenium.webdriver.chrome.webdriver import WebDriver
+from unittest.mock import patch
 from .models import *
 from .views import *
 
 TEST_BUCKET_NAME = 'test-rsftzmqvua'
 TEST_FILE_NAME = 'test.pdf'
-
+TEST_DATA_DIR = os.path.join(os.getcwd(),' data/tests')
 #NOTE TEST INSTANCE
 class TestSignals(TestCase):
     def setUp(self):
@@ -63,10 +65,68 @@ class TestWorker(TestCase):
         pass
 
 
-class TestBinaryClassificationJob(TestCase):
+class TestLiveJob(StaticLiveServerTestCase):
+    #fixtures = ['user-data.json']
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        import ipdb; ipdb.set_trace()
+        cls.selenium = WebDriver('data/drivers/macos/chromedriver')
+        cls.selenium.implicitly_wait(10)
+
     def setUp(self):
         User.objects.all().delete()
         self.test_user = User.objects.create(username='test')
+
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.selenium.quit()
+        super().tearDownClass()
+
+
+
+
+    def test_perform(self):
+        import ipdb; ipdb.set_trace()
+        test_file_path = os.path.join(TEST_DATA_DIR,TEST_FILE_NAME)
+        bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
+        job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
+        file = File.objects.create(name=TEST_FILE_NAME, parent=bucket)
+        file.copy()
+#        file.save()
+        perform_url = reverse('job-perform',args=[1])    + '?format=json' 
+        self.client.force_login(self.test_user)
+ 
+        class mock_Instance:
+            url = 'file://' + test_file_path      
+ 
+        with patch.object(File, '_instance', return_value=mock_Instance) as mock_method:
+            response = self.client.get(perform_url, format='json', follow=True, content_type='application/json')
+
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = {}
+        response = self.client.post(perform_url, data,format='json', follow=True, content_type='application/json')
+        import ipdb; ipdb.set_trace()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.selenium.get('%s%s' % (self.live_server_url, '/login/'))
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys('myuser')
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys('secret')
+        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+
+
+
+class TestBinaryClassificationJob(TestCase):
+
+
+    def setUp(self):
+        User.objects.all().delete()
+        self.test_user = User.objects.create(username='test')
+
+
 
     def test_perform(self):
         import ipdb; ipdb.set_trace()
