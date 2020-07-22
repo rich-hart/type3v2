@@ -9,6 +9,7 @@ from procedures.utils import process
 from django.contrib.auth.models import User, Group, AnonymousUser
 from buckets.models import File
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer, TemplateHTMLRenderer
+import django_filters
 from procedures.tasks import copy as copy_file
 
 from .models import *
@@ -22,6 +23,8 @@ class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
     STAGING_SIZE = 20
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
+    filterset_fields = ['owner']
 #    def get_queryset(self):
 #        user = self.request.user
 #        if isinstance(user, AnonymousUser):

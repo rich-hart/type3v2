@@ -137,6 +137,10 @@ class File(FSObject):
     )
     _path = models.FileField(storage=StaticStorage()) #FIXME: DEPRICATE
     _instance = models.FileField(storage=MediaStorage())
+
+    @property
+    def instance(self):
+        return self._instance
 #    parent = models.ForeignKey(Folder, on_delete=models.CASCADE,null=True)
 #    parent = models.ForeignKey(FSObject, on_delete=models.CASCADE,null=True)
 
@@ -222,7 +226,7 @@ class File(FSObject):
             raise NotImplementedError  
             #self._array = None
 
-class PDF(File):
+#class PDF(File):
 
 #    def cache(self):
 #        output = io.BytesIO() 
@@ -232,27 +236,27 @@ class PDF(File):
 #        self._raw = output.read()
 #        self.cache_client.set(self.tag.hex, self._raw)
 
-    def convert(self):
-        if self.format == File.Format.pdf.value:
-            return convert_from_bytes(self._raw)
-        else:
-            raise NotImplementedError
-
-    def load(self):
-        self._raw = self.cache_client.get(self.tag.hex)
-        if self._raw:
-            input = io.BytesIO(self._raw)
-            self._pil = PIL.Image.open(input)
-            return
-        elif isinstance(self.root, Bucket): 
-            fileobj = self.s3_client.get_object(
-                Bucket=self.root.name,
-                Key=self.name,
-            )
-            self._raw = fileobj['Body'].read()
-        else:
-            raise NotImplementedError  
-            #self._array = None
+#    def convert(self):
+#        if self.format == File.Format.pdf.value:
+#            return convert_from_bytes(self._raw)
+#        else:
+#            raise NotImplementedError
+#
+#    def load(self):
+#        self._raw = self.cache_client.get(self.tag.hex)
+#        if self._raw:
+#            input = io.BytesIO(self._raw)
+#            self._pil = PIL.Image.open(input)
+#            return
+#        elif isinstance(self.root, Bucket): 
+#            fileobj = self.s3_client.get_object(
+#                Bucket=self.root.name,
+#                Key=self.name,
+#            )
+#            self._raw = fileobj['Body'].read()
+#        else:
+#            raise NotImplementedError  
+#            #self._array = None
 
 
 def get_ext(path):

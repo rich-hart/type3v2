@@ -23,22 +23,34 @@ from django.urls import path, include
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-
+from rest_framework import routers
 
 @api_view(['GET'])
 def api_root(request, format=None):
     return Response({
-        'jobs': reverse('job-list', request=request, format=format),
+        'files': reverse('file-list', request=request, format=format),
+        'buckets': reverse('bucket-list', request=request, format=format),
+
 #        'snippets': reverse('snippet-list', request=request, format=format)
     })
 
+from jobs.views import JobViewSet
+from buckets.views import BucketViewSet, FileViewSet, FSObjectViewSet
+router = routers.DefaultRouter()
 
+router.register(r'jobs', JobViewSet,basename='job')
+router.register(r'files', FileViewSet)
+router.register(r'buckets', BucketViewSet)
+router.register(r'fsobjects', FSObjectViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('jobs/', include('jobs.urls')),
-    path('api/', api_root),
-    path('classifiers/', include('classifiers.urls')),
-
+#    path('jobs/', include('jobs.urls')),
+    path('api/', include(router.urls)),
+#    path('classifiers/', include('jobs.urls')),
+#    path('api/buckets/', include('buckets.urls'), name='buckets-root'),
+#    path('api/buckets/', include(('buckets.urls','buckets'),namespace='bucket')),
+#    path('api/jobs/', include(('jobs.urls', 'jobs'),namespace='project-jobs')),
+#    path('api/', api_root, name='project-api'),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
 

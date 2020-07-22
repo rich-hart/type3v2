@@ -1,7 +1,7 @@
 django
 djangorestframework
 django-tagging
-django_filter
+#django_filter
 django-storages
 numpy
 pymongo
@@ -12,3 +12,5 @@ psycopg2-binary
 networkx
 pika
 #django-celery-results
+django-filter
+
