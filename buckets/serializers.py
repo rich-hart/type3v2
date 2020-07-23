@@ -2,16 +2,22 @@ from rest_framework import serializers
 
 from .models import *
 
-class FileSerializer(serializers.HyperlinkedModelSerializer):
+class FileSerializer(serializers.ModelSerializer):
+    instance = serializers.FileField(read_only=True)
     class Meta:
         model = File
         fields = (
             'id',
             'url',
             'format',
-#            'instance',
+            'instance',
         )
         read_only_fields = fields
+    def to_representation(self, instance):
+        instance.instance = instance._instance
+        rep = super(FileSerializer, self).to_representation(instance)
+        return rep 
+
 #        extra_kwargs = {
 #            'url': {'view_name': 'buckets:file','lookup_field': 'pk'}
 #        }

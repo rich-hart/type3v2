@@ -136,11 +136,11 @@ class File(FSObject):
         default=Format.get_default(),
     )
     _path = models.FileField(storage=StaticStorage()) #FIXME: DEPRICATE
-    _instance = models.FileField(storage=MediaStorage())
+    _instance = models.FileField(storage=MediaStorage(),null=True)
 
-    @property
-    def instance(self):
-        return self._instance
+#    @property
+#    def instance(self):
+#        return self._instance
 #    parent = models.ForeignKey(Folder, on_delete=models.CASCADE,null=True)
 #    parent = models.ForeignKey(FSObject, on_delete=models.CASCADE,null=True)
 

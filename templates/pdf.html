@@ -4,12 +4,14 @@
   {{block.super}}
   <script>
     debugger
+    var pdf_url = "{{response.data.results[0]}}"
+    debugger
     document.getElementById('response info')
     response_info = document.getElementsByClassName('response-info')[0]
     parent_element = response_info.parentElement
     parent_element.removeChild(response_info);
     iframe = document.createElement('iframe')
-    iframe.setAttribute('src', "{{response.data.file.url}}");
+    iframe.setAttribute('src', pdf_url);
     iframe.setAttribute('id', 'main-frame')
     iframe.classList.add('pdf-frame');
     iframe.setAttribute('style',"pointer-events:none;")
