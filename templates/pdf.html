@@ -4,7 +4,14 @@
   {{block.super}}
   <script>
     debugger
-    var pdf_url = "{{response.data.results[0]}}"
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+
+    var page_number = urlParams.get('page') || '1'
+    var pdf_url = "{{response.data.results.0.instance}}"
+    var pdf_options = "toolbar=0" + "&page=" + page_number +"&pagemode=bookmarks"
+    pdf_url = pdf_url+'#'+pdf_options
+
     debugger
     document.getElementById('response info')
     response_info = document.getElementsByClassName('response-info')[0]

@@ -60,9 +60,9 @@ class TestLiveBucket(StaticLiveServerTestCase):
 #        job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
         #file = File.objects.create(name=TEST_FILE_NAME)
         #file.copy()
-        bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
+        bucket = Bucket.objects.create(name='test-vvhgiscyyf')
         #job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
-        file = File.objects.create(name=TEST_FILE_NAME, parent=bucket)
+        file = File.objects.create(name='multi_page.pdf', parent=bucket)
         file.copy()
         file.s3_client.put_object_acl(
             ACL='public-read',
@@ -72,7 +72,7 @@ class TestLiveBucket(StaticLiveServerTestCase):
             Key=os.path.join(file._instance.storage.location,file._instance.name),
         )
 #        file._instance.save(TEST_FILE_NAME, io.BytesIO())
-        uri = reverse('file-list') 
+        uri = reverse('file-list') + '?' + 'format=pdf' 
         #patcher = patch('buckets.views.BucketViewSet.list')
         #self.addCleanup(patcher.stop)
         #MockView = patcher.start()
