@@ -13,4 +13,5 @@ networkx
 pika
 #django-celery-results
 django-filter
+PyPDF2
 

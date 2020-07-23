@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from django.contrib.auth.models import User, AnonymousUser
 from django.urls import reverse
 from rest_framework.test import APIRequestFactory
+from PyPDF2 import PdfFileReader
 from .models import *
 from .serializers import *
 from .views import *
@@ -60,10 +61,17 @@ class TestLiveBucket(StaticLiveServerTestCase):
 #        job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
         #file = File.objects.create(name=TEST_FILE_NAME)
         #file.copy()
+
         bucket = Bucket.objects.create(name='test-vvhgiscyyf')
         #job = Classification.objects.create(owner=self.test_user.profile,bucket=bucket)
-        file = File.objects.create(name='multi_page.pdf', parent=bucket)
+        file = File.objects.create(name='multi_page.pdf', parent=bucket,format='pdf')
         file.copy()
+
+        pdf = PdfFileReader(file._instance.file) 
+
+        for _ in range(pdf.getNumPages()):
+            File.objects.create(name=file.name, parent=file, format='pdf', _instance=file._instance)
+            
         file.s3_client.put_object_acl(
             ACL='public-read',
 #            Bucket=file.root.name,
@@ -72,7 +80,7 @@ class TestLiveBucket(StaticLiveServerTestCase):
             Key=os.path.join(file._instance.storage.location,file._instance.name),
         )
 #        file._instance.save(TEST_FILE_NAME, io.BytesIO())
-        uri = reverse('file-list') + '?' + 'format=pdf' 
+        uri = reverse('file-list') + f'?format=pdf&page_size=1&parent={file.pk}'  
         #patcher = patch('buckets.views.BucketViewSet.list')
         #self.addCleanup(patcher.stop)
         #MockView = patcher.start()
