@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'django_neomodel',
     'rest_framework',
     'django_filters',
+
+    #NOTE: create base project 'Object'
+    'project',
 ]
 
 

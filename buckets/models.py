@@ -10,7 +10,7 @@ from pymongo import MongoClient
 from pymemcache.client.base import Client
 from django.conf import settings
 from django.db import models
-from bases.models import Object, Choice
+from project.models import Object, Choice
 from typing import List
 from project.storage_backends import StaticStorage, MediaStorage
 from pdf2image import convert_from_path, convert_from_bytes
