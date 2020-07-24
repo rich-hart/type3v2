@@ -150,7 +150,7 @@ class TestUtils(TestCase):
         tags = convert_to_images(0,*[file])
         self.assertTrue(len(tags))
         image = Image.objects.get(tag=tags[0]) 
-        data = image.cache_client.get(image.tag.hex) 
+        data = image.clients['cache']().get(image.tag.hex) 
         sleep(.3)
         self.assertIsNotNone(data)
 
@@ -163,7 +163,7 @@ class TestUtils(TestCase):
         tags = ocr(0,*[image])
         self.assertTrue(len(tags))
         sleep(.3)
-        cache = FSObject().cache_client
+        cache = FSObject().clients['cache']()
         data = cache.get(tags[0])
         self.assertIsNotNone(data)
     def cleanUpPaths(self):

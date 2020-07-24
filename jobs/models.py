@@ -5,7 +5,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import signals
 from tagging.models import Tag, TaggedItem
-from bases.models import Choice, Label, Object, Base
+from project.models import Choice, Object, Base
 
 from buckets.models import Bucket, File
 from classifiers.models import Classifier, Human as HumanClassifier

@@ -195,7 +195,6 @@ class TestBinaryClassificationJob(TestCase):
 
 
     def test_perform(self):
-        import ipdb; ipdb.set_trace()
         user = User.objects.create(username='assignee')
 
         bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
@@ -220,8 +219,6 @@ class TestBinaryClassificationJob(TestCase):
 
         user = User.objects.create(username='assignee')
 
-#        Profile.objects.create(user=self.test_user)
-#        Profile.objects.create(user=user)
        
         job_url = reverse('job-list')  + '?format=json' 
 
@@ -250,10 +247,8 @@ class TestBinaryClassificationJob(TestCase):
 class TestDemo(TestBinaryClassificationJob):
     def setUp(self):
         User.objects.all().delete()
-
-    def setUp(self):
         self.test_user = User.objects.create(username='test')
-        Profile.objects.create(user=self.test_user)
+
 
     def test_create_job(self):
         owner  = self.test_user
@@ -265,8 +260,6 @@ class TestDemo(TestBinaryClassificationJob):
 
         test_objects = [User.objects.create(username=str(i)) for i in range(5)]
 
-        for user in test_objects:
-            Profile.objects.create(user=user)
 
         for test_object in test_objects:
             job.tag_object(test_object.profile)
@@ -326,7 +319,6 @@ class TestJob(TestCase):
         view = JobViewSet.as_view({'get':'start'})
 
         self.test_user = User.objects.create(username='test')
-        Profile.objects.create(user=self.test_user)
 #        job = Classification.objects.create(owner=self.test_user.profile)
         job_url = reverse('job-list')
         job_url = os.path.join(job_url,str(job.id),'start') + '/?format=json' 
@@ -348,7 +340,6 @@ class TestJob(TestCase):
         #view = JobViewSet.as_view({'get':'start'})
 
         self.test_user = User.objects.create(username='test')
-        Profile.objects.create(user=self.test_user)
         job = Classification.objects.create(owner=self.test_user.profile)
         call_command('start', job.id)
         sleep(.3)

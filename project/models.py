@@ -7,6 +7,7 @@ from django.db.models import signals
 import boto3
 from pymongo import MongoClient
 from pymemcache.client.base import Client as CacheClient
+from tagging.models import Tag
 import uuid 
 
 def get_namespace(name):
@@ -34,8 +35,17 @@ class Client:
         with function call e.g. project_client = Client()
         service_client = project_client()
         """
-        return self.instance
+        return self._instance
 
+    @property
+    def instance(self):
+        if not self._instance:
+            raise NotImplementedError()
+        return self._instance
+
+    def reload(self):
+        self._instance = None
+        self.instance
  #    @property
 #    def cache_client(self):
 #        if not self._cache_client:
@@ -171,7 +181,7 @@ class Base(models.Model):
  
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    _clients = set([
+    _clients = dict((c.name,c) for c in [
         Mongo(),
         Cache(),
         S3(),
@@ -179,7 +189,7 @@ class Base(models.Model):
 
     @property
     def clients(self):
-        return { c.name: c for c in self._clients }
+        return self._clients 
 
     tag = models.UUIDField(
         primary_key = False,
@@ -221,7 +231,7 @@ class Object(Base):  #NOTE: Replace Base with Object?  Allow either / or?
     name = models.CharField(max_length=2**6)
 #    class Meta:
 #        abstract = True
-class Tag(Base):
+class ProjectTag(Base):
     id = models.UUIDField(
         primary_key = True,
         unique = True,
@@ -236,13 +246,14 @@ class Tag(Base):
 
 Object.register_tags()
 
-def save_to_mongo(sender, instance, *args, **kwargs):
-    client = sender.clients['mongo']() 
-    collection = client.db[instance.class_name]
-    instance._data['_id'] = instance.tag.hex
-    collection.insert_one(instance._data)
-    instance._data = {}
-    instance.save()
 
-signals.pre_save.connect(receiver=save_to_mongo, sender=Tag)
+def save_to_mongo(sender, instance, created, *args, **kwargs):
+    if created:
+        collection = instance.clients['mongo']().db[instance.class_name]
+        instance._data['_id']=instance.id;
+        collection.insert_one(instance._data);
+        instance._data = {}
+        instance.save()
+
+signals.post_save.connect(receiver=save_to_mongo, sender=ProjectTag)
 
