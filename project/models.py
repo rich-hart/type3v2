@@ -238,7 +238,9 @@ class ProjectTag(Base):
         editable = False,
     )
     _data = JSONField(default=dict)
-    
+    #TODO: app choice (easier object recall)
+    #TODO: model choice (easier object recall)
+        
     @property 
     def data(self):
         #FIXME: Overwrite with mongo

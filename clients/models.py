@@ -5,9 +5,11 @@ from project.models import Base
 # Create your models here.
 # NOTE: TEST THIS WITH QA CREDENTIALS AND CONSERNS
 # TODO: fixture: Type3, GIS, Capco, WF
-class Client(Base):
+class BusinessClient(Base):
     name = models.CharField(max_length=127, unique=True)
     # NOTE: add name to user group on instance init
 
+    def __str__(self):
+        return f'({self.id}) {self.name}'
 
-Client.register_tags()
+BusinessClient.register_tags()
