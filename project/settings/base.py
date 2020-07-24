@@ -7,6 +7,7 @@ INSTALLED_APPS += depends.build(
     'tools',
     'jobs',
     'procedures',
+    'clients',
 )
 
 INSTALLED_APPS = list(set(INSTALLED_APPS))

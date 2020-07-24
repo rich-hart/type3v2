@@ -6,7 +6,6 @@ import numpy as np
 from django.conf import  settings
 from django.db import models
 from project.storage_backends import StaticStorage, MediaStorage
-from bases.models import Memory, ROOT_NAMESPACE
 from buckets.models import FSObject
 
 #https://docs.celeryproject.org/en/stable/userguide/configuration.html#conf-cache-result-backend

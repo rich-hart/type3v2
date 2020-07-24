@@ -4,7 +4,7 @@ from django.db.models import signals
 
 from django.contrib.auth.models import User
 
-from bases.models import Base
+from project.models import Base
 
 
 
@@ -36,11 +36,8 @@ def update_or_create_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
 
-#    if not getattr(instance,'profile',None):
-#        profile,_ = Profile.objects.update_or_create(user=instance)
-#        profile.save()
 
 signals.post_save.connect(receiver=update_or_create_profile, sender=User)
-#FIXME:  Auto run register_tags for global modules on startup
 
+Account.register_tags()
 Profile.register_tags()

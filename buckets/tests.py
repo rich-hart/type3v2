@@ -123,6 +123,7 @@ class TestModels(TestCase):
         self.assertEqual(file.root,bucket)
 
     def test_load(self):
+        import ipdb; ipdb.set_trace()
         bucket = Bucket.objects.create(name=TEST_BUCKET_NAME)
         file = File.objects.create(parent=bucket,name=TEST_FILE_NAME)
         file.load()

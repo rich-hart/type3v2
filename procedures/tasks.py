@@ -3,7 +3,7 @@ from typing import List
 import celery
 from celery import shared_task
 
-from bases.models import Object
+from project.models import Object
 from .queue import RabbitMQ as Queue
 HashObjects = List[str]
 ModelObjects = List[Object]

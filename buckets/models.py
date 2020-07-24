@@ -5,12 +5,14 @@ import numpy as np
 import pandas as pd
 import pickle
 import boto3
-from pymongo import MongoClient
+#from pymongo import MongoClient
 
 from pymemcache.client.base import Client
 from django.conf import settings
+from django.core.files.storage import default_storage
+from PyPDF2 import PdfFileReader
 from django.db import models
-from bases.models import Object, Choice
+from project.models import Object, Choice
 from typing import List
 from project.storage_backends import StaticStorage, MediaStorage
 from pdf2image import convert_from_path, convert_from_bytes
@@ -18,30 +20,17 @@ import PIL
 #https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html
 #https://www.slsmk.com/use-boto3-to-open-an-aws-s3-file-directly/
 
-#class Object(Base):
-    # path
-    # name
-    #path = FileField
-#    parent = models.ForeignKey(Base, on_delete=models.CASCADE)
-
-
-#    class Meta:
-#        abstract = True
 
 
 
 class FSObject(Object):
-    MONGO_URI = f'mongodb://{settings.MONGO_USERNAME}:{settings.MONGO_PASSWORD}@{settings.MONGO_HOST}:{settings.MONGO_PORT}' #TODO: FIXME: Move to settings
-    _s3_client = None
-    _cache_client = None
-    _mongo_client = None
-    _mongo_db = None
-    _collection = None
+    parent = models.ForeignKey(
+        'buckets.FSObject',
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='+'
+    )
 
-
-
-
-    parent = models.ForeignKey('buckets.FSObject', on_delete=models.CASCADE, null=True, related_name='+')
     @property
     def key(self):
         return self.name
@@ -62,63 +51,12 @@ class FSObject(Object):
     def root(self):
         return self._root(self)
 
-    @property
-    def mongo_db(self):
-        if not self._mongo_db:
-            self._mongo_db = self.mongo_client[settings.MONGO_DATABASE]
-        return self._mongo_db
-
-    @property
-    def collection(self):
-        if not self._collection:
-            self._collection=self.mongo_db[self.class_name]
-        return self._collection
-
-    @property
-    def mongo_client(self):
-        if not self._mongo_client:
-#            self._mongo_client = MongoClient(
-#                settings.MONGO_HOST,
-#                settings.MONGO_PORT,
-#                username=settings.MONGO_USERNAME,
-#                password=settings.MONGO_PASSWORD,
-#                authSource="admin",
-#            )
-#            self._mongo_client = MongoClient(f"mongodb://{settings.MONGO_USERNAME}:"\
-#                "{settings.MONGO_PASSWORD}@"\
-#                "{settings.MONGO_HOST}/{MONGO_DATABASE}")
-            self._mongo_client = MongoClient(self.MONGO_URI)
-        return self._mongo_client
-
-    @property
-    def s3_client(self):
-        if not self._s3_client:
-            self._s3_client = boto3.client(
-                's3',
-                region_name=settings.AWS_REGION,
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            )
-        return self._s3_client
-    @property
-    def cache_client(self):
-        if not self._cache_client:
-            self._cache_client = Client((settings.MEMCACHED_HOST, settings.MEMCACHED_PORT))
-        return self._cache_client
-
 
 
 class Folder(FSObject):
      pass
-#    parent = models.ForeignKey(FSObject, on_delete=models.CASCADE,null=True,related_name='+')
 
-#    @property
-#    def bucket(self):
-#        return self.parent
-# TODO: FIXME!!! 
-# Use binary stream of from boto3 to pull in data to general file
-# data from aws
-# FIXME: DO NOT WRITE TO HOST FS!!!!
+
 class File(FSObject):
     class Format(Choice):
         undefined = None
@@ -126,7 +64,7 @@ class File(FSObject):
         @classmethod
         def get_default(cls):
             return cls.undefined.value
-
+    _pdf = None
     _raw = None
     format = models.CharField(
         max_length=3,
@@ -135,16 +73,28 @@ class File(FSObject):
         choices=Format.get_choices(),
         default=Format.get_default(),
     )
-    _path = models.FileField(storage=StaticStorage()) #FIXME: DEPRICATE
     _instance = models.FileField(storage=MediaStorage(),null=True)
+    
+    @property
+    def pdf(self):
+        if not self._pdf:
+            self._pdf = PdfFileReader(file._instance.file)
+        return self._pdf
+        
 
-#    @property
-#    def instance(self):
-#        return self._instance
-#    parent = models.ForeignKey(Folder, on_delete=models.CASCADE,null=True)
-#    parent = models.ForeignKey(FSObject, on_delete=models.CASCADE,null=True)
+    def getNumPages(self):
+        page_numbers = None
+        if self.format == File.Format.pdf.value and \
+            not self.parent or self.parent.format!=File.Format.pdf.value:
+            pdf = PdfFileReader(file._instance.file)
+            page_numbers = self.pdf.getNumPages()
+        return page_numbers
 
-#    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
+    def convert(self):
+        if self.format == File.Format.pdf.value:
+            return convert_from_bytes(self.raw)
+        else:
+            raise NotImplementedError
 
     def copy(self,lazy=True):
         #TODO!!!!: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.copy_object
@@ -174,9 +124,9 @@ class File(FSObject):
                          'Bucket': dest_bucket,
                          'Key': dest_key,
                      }
-                     dest_head_object=self.s3_client.head_object(**copy_dest)
+                     dest_head_object=self.clients['s3']().head_object(**copy_dest)
                      dest_size = dest_head_object.get('ContentLength',0)
-                     src_head_object=self.s3_client.head_object(**copy_source)
+                     src_head_object=self.clients['s3']().head_object(**copy_source)
                      src_size = src_head_object.get('ContentLength',0)
                      if src_size == dest_size:
                          return
@@ -186,46 +136,34 @@ class File(FSObject):
                
 
 
-             self.s3_client.copy(copy_source, dest_bucket, dest_key)      
-#            path = os.path.join(folder_key, file_key)
-#            copy_source = {
-#                'Bucket': self.name,
-#                'Key': path
-#            }
-#            pdf._instance.save(pdf_key, io.BytesIO()) #TouchFile to load urls
-#            pdf._instance.close()
-#            dest_bucket = pdf._instance.storage.bucket.name
-#            dest_key = os.path.join(pdf._instance.storage.location, pdf._instance.name)
-#            self.s3_client.copy(copy_source, dest_bucket, dest_key)
+             self.clients['s3']().copy(copy_source, dest_bucket, dest_key)      
 
        
     @property
     def raw(self):
         return self._raw
 
-#    def cache(self):
-#        output = io.BytesIO() 
-#        self._pil.save(output, format = self.format)
-#        output.flush()
-#        output.seek(0)
-#        self._raw = output.read()
-#        self.cache_client.set(self.tag.hex, self._raw)
+    def cache(self):
+        output = io.BytesIO() 
+        self._pil.save(output, format = self.format)
+        output.flush()
+        output.seek(0)
+        self._raw = output.read()
+        self.clients['cache']().set(self.tag.hex, self._raw)
 
 
     def load(self):
-        self._raw = self.cache_client.get(self.tag.hex)
+        self._raw = self.clients['cache']().get(self.tag.hex)
         if self._raw:
             return
         elif isinstance(self.root, Bucket): 
-            fileobj = self.s3_client.get_object(
+            fileobj = self.clients['s3']().get_object(
                 Bucket=self.root.name,
                 Key=self.name,
             )
             self._raw = fileobj['Body'].read()
         else:
             raise NotImplementedError  
-            #self._array = None
-
 #class PDF(File):
 
 #    def cache(self):
@@ -236,11 +174,7 @@ class File(FSObject):
 #        self._raw = output.read()
 #        self.cache_client.set(self.tag.hex, self._raw)
 
-#    def convert(self):
-#        if self.format == File.Format.pdf.value:
-#            return convert_from_bytes(self._raw)
-#        else:
-#            raise NotImplementedError
+
 #
 #    def load(self):
 #        self._raw = self.cache_client.get(self.tag.hex)
@@ -268,11 +202,10 @@ def get_prefix(path):
     tokens = os.path.basename(path).split(os.extsep)
     return tokens[0]
 
-from django.core.files.storage import default_storage
  
 class Bucket(FSObject):
     def list_objects(self) -> List[str]:
-        objects = self.s3_client.list_objects(Bucket=self.name)
+        objects = self.clients['s3']().list_objects(Bucket=self.name)
         keys = [ o['Key'] for o in objects['Contents'] ]
         return keys
 
@@ -287,18 +220,8 @@ class Bucket(FSObject):
             if folder_key:
                 parent,_ = Folder.objects.get_or_create(name=folder_key,parent=self)
             else:
-                parent = self #FIXME: NEED TO LINK TO BUCKET
+                parent = self
             file, _ = File.objects.get_or_create(name=file_key, parent=parent, format=format)
-#            path = os.path.join(folder_key, file_key)
-#            copy_source = {
-#                'Bucket': self.name,
-#                'Key': path
-#            }
-#            pdf._instance.save(pdf_key, io.BytesIO()) #TouchFile to load urls
-#            pdf._instance.close()
-#            dest_bucket = pdf._instance.storage.bucket.name
-#            dest_key = os.path.join(pdf._instance.storage.location, pdf._instance.name)
-#            self.s3_client.copy(copy_source, dest_bucket, dest_key)
             files.append(file)
         return files
 
@@ -339,7 +262,7 @@ class Text(File): #TEXT
     _frame = None
     # image = 1-1 Image
     def cache(self):
-        self.cache_client.set(self.tag.hex, self._raw)
+        self.clients['cache']().set(self.tag.hex, self._raw)
 
     @property
     def frame(self):
@@ -351,9 +274,9 @@ class Text(File): #TEXT
         return pd.read_csv(io.StringIO(self._raw.decode()),sep='\t',dtype={'text':str})
 
     def load(self):
-        data = self.cache_client.get(self.tag.hex)
+        data = self.clients['cache']().get(self.tag.hex)
         if not data: 
-            fileobj = self.s3_client.get_object(
+            fileobj = self.clients['s3']().get_object(
                 Bucket=self.root.name,
                 Key=self.name,
             )
@@ -411,7 +334,7 @@ class Image(File):
         output.flush()
         output.seek(0)
         self._raw = output.read()
-        self.cache_client.set(self.tag.hex, self._raw)
+        self.clients['cache']().set(self.tag.hex, self._raw)
 
 
     @property
