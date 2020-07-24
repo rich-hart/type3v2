@@ -234,7 +234,6 @@ class Object(Base):  #NOTE: Replace Base with Object?  Allow either / or?
 class ProjectTag(Base):
     id = models.UUIDField(
         primary_key = True,
-        unique = True,
         editable = False,
     )
     _data = JSONField(default=dict)
@@ -250,6 +249,7 @@ Object.register_tags()
 
 
 def save_to_mongo(sender, instance, created, *args, **kwargs):
+    import ipdb; ipdb.set_trace()
     if created:
         collection = instance.clients['mongo']().db[instance.class_name]
         instance._data['_id']=instance.id;
