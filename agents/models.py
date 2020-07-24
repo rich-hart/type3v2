@@ -1,6 +1,6 @@
 from django.db import models
 
-from bases.models import Base
+from project.models import Base
 
 
 class Agent(Base):

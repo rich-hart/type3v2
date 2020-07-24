@@ -2,7 +2,6 @@ from enum import Enum
 import random
 from django.db import models
 from django.contrib.auth.models import User
-from bases.models import Label
 from tools.models import Tool
 from django.db.models import signals
 import uuid

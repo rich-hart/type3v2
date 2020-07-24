@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from bases.models import Object, Memory 
+from project.models import Object 
 from .models import *
 
 

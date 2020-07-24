@@ -14,7 +14,7 @@ from pdf2image import convert_from_path, convert_from_bytes
 import PIL
 from buckets.models import Bucket, File, FSObject
 
-from bases.models import Object
+from project.models import Object
 from project.celery import app as celery_app
 
 from .utils import *

@@ -12,7 +12,7 @@ import pymongo
 from pymongo import MongoClient
 import pytesseract
 import pandas
-from bases.models import Object
+from project.models import Object
 from celery import Celery
 from celery.utils.log import get_task_logger
 

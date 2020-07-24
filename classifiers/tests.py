@@ -10,7 +10,7 @@ from django.core.management import call_command
 
 from tools.models import TfIDF
 
-from bases.models import Object, Memory
+from project.models import Object
 
 from users.models import User, Profile
 
@@ -53,8 +53,8 @@ class ClassificationView(TestCase):
 #        human = Human.object.create(profile=self.test_user.profile)
         
         self.human_classifier.tag_object(self.file) 
-        data = Memory.encode('libor')
-        Memory.objects.create(id=self.human_classifier.Namespace.LABEL.uuid,_data=data)
+#        data = Memory.encode('libor')
+#        Memory.objects.create(id=self.human_classifier.Namespace.LABEL.uuid,_data=data)
         #self.file.tags.append(self.human_classifier.tag)
         classifier_url = reverse('classifier-list')
         self.client.force_login(self.test_user)
