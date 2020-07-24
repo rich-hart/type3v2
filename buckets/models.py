@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pickle
 import boto3
-from pymongo import MongoClient
+#from pymongo import MongoClient
 
 from pymemcache.client.base import Client
 from django.conf import settings
@@ -62,21 +62,21 @@ class FSObject(Object):
     def root(self):
         return self._root(self)
 
-    @property
-    def mongo_db(self):
-        if not self._mongo_db:
-            self._mongo_db = self.mongo_client[settings.MONGO_DATABASE]
-        return self._mongo_db
+#    @property
+#    def mongo_db(self):
+#        if not self._mongo_db:
+#            self._mongo_db = self.mongo_client[settings.MONGO_DATABASE]
+#        return self._mongo_db
+#
+#    @property
+#    def collection(self):
+#        if not self._collection:
+#            self._collection=self.mongo_db[self.class_name]
+#        return self._collection
 
-    @property
-    def collection(self):
-        if not self._collection:
-            self._collection=self.mongo_db[self.class_name]
-        return self._collection
-
-    @property
-    def mongo_client(self):
-        if not self._mongo_client:
+#    @property
+#    def mongo_client(self):
+#        if not self._mongo_client:
 #            self._mongo_client = MongoClient(
 #                settings.MONGO_HOST,
 #                settings.MONGO_PORT,
@@ -87,24 +87,24 @@ class FSObject(Object):
 #            self._mongo_client = MongoClient(f"mongodb://{settings.MONGO_USERNAME}:"\
 #                "{settings.MONGO_PASSWORD}@"\
 #                "{settings.MONGO_HOST}/{MONGO_DATABASE}")
-            self._mongo_client = MongoClient(self.MONGO_URI)
-        return self._mongo_client
+#            self._mongo_client = MongoClient(self.MONGO_URI)
+#        return self._mongo_client
 
-    @property
-    def s3_client(self):
-        if not self._s3_client:
-            self._s3_client = boto3.client(
-                's3',
-                region_name=settings.AWS_REGION,
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            )
-        return self._s3_client
-    @property
-    def cache_client(self):
-        if not self._cache_client:
-            self._cache_client = Client((settings.MEMCACHED_HOST, settings.MEMCACHED_PORT))
-        return self._cache_client
+#    @property
+#    def s3_client(self):
+#        if not self._s3_client:
+#            self._s3_client = boto3.client(
+#                's3',
+#                region_name=settings.AWS_REGION,
+#                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+#                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+#            )
+#        return self._s3_client
+#    @property
+#    def cache_client(self):
+#        if not self._cache_client:
+#            self._cache_client = Client((settings.MEMCACHED_HOST, settings.MEMCACHED_PORT))
+#        return self._cache_client
 
 
 
@@ -174,9 +174,9 @@ class File(FSObject):
                          'Bucket': dest_bucket,
                          'Key': dest_key,
                      }
-                     dest_head_object=self.s3_client.head_object(**copy_dest)
+                     dest_head_object=self.clients['s3']().head_object(**copy_dest)
                      dest_size = dest_head_object.get('ContentLength',0)
-                     src_head_object=self.s3_client.head_object(**copy_source)
+                     src_head_object=self.clients['s3']().head_object(**copy_source)
                      src_size = src_head_object.get('ContentLength',0)
                      if src_size == dest_size:
                          return
@@ -186,7 +186,7 @@ class File(FSObject):
                
 
 
-             self.s3_client.copy(copy_source, dest_bucket, dest_key)      
+             self.clients['s3']().copy(copy_source, dest_bucket, dest_key)      
 #            path = os.path.join(folder_key, file_key)
 #            copy_source = {
 #                'Bucket': self.name,
@@ -203,21 +203,21 @@ class File(FSObject):
     def raw(self):
         return self._raw
 
-#    def cache(self):
-#        output = io.BytesIO() 
-#        self._pil.save(output, format = self.format)
-#        output.flush()
-#        output.seek(0)
-#        self._raw = output.read()
-#        self.cache_client.set(self.tag.hex, self._raw)
+    def cache(self):
+        output = io.BytesIO() 
+        self._pil.save(output, format = self.format)
+        output.flush()
+        output.seek(0)
+        self._raw = output.read()
+        self.clients['cache']().set(self.tag.hex, self._raw)
 
 
     def load(self):
-        self._raw = self.cache_client.get(self.tag.hex)
+        self._raw = self.clients['cache']().get(self.tag.hex)
         if self._raw:
             return
         elif isinstance(self.root, Bucket): 
-            fileobj = self.s3_client.get_object(
+            fileobj = self.clients['s3']().get_object(
                 Bucket=self.root.name,
                 Key=self.name,
             )
